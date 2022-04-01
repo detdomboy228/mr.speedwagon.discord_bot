@@ -223,4 +223,4 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-bot.run('OTU4NzExNzE0NDU3NzM1MTc4.YkRT3A.J14ZESqFkc4_VDAD_iHZZOt8-8U')
+bot.run('bebra')
