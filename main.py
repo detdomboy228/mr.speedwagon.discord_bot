@@ -222,6 +222,8 @@ async def on_message(message):
     elif ('пошел нахуй' in message.content.lower() or 'пошёл нахуй' in message.content.lower()) and \
             'бот' in message.content.lower():
         await message.channel.send('слушаюсь, мой господин')
+    elif 'джозеф худший джоджо' in message.content.lower():
+        await message.channel.send('полностью согласен!!!\nсамый крутой Джотаро')
     else:
         pass
     # вот тут СГЛЫПА
@@ -231,20 +233,26 @@ async def on_message(message):
     res = cur.execute(f"""SELECT * FROM {name}""").fetchall()
     c = 0
     for e in res:
-        if message.content in e[0]:
+        if str(message.content) == e[0]:
             c += 1
     if c == 0 and ('!' not in message.content or message.content[0] != '!') and\
             '#' not in message.content and 'p!' not in message.content:
-        cur.execute(f"""INSERT INTO {name}(mess, id) VALUES('{message.content}', {int(len(res)) + 1})""")
-        if len(res) + 1 > 300:
+        cur.execute(f"""INSERT INTO {name}(mess, id) VALUES('{str(message.content)}', {int(len(res)) + 1})""")
+        if len(res) + 1 > 500:
             cur.execute(f"""DELETE from {name} WHERE id = 1""")
             cur.execute(f"""UPDATE {name} SET id = id - 1""")
         db.commit()
     sp = [e[0] for e in cur.execute(f"""SELECT * FROM {name}""").fetchall()]
-    if len(sp) >= 300 and random.choice([0, 1, 2, 3]) == 3:
-        await message.channel.send(random.choice(sp))
+
+    if len(sp) >= 500 and random.choice([0, 1, 2, 3]) == 3:
+        if list(filter(lambda x: message.content.lower() in str(x).lower(), sp)):
+            await message.channel.send(random.choice(list(filter(lambda x: message.content.lower() in str(x).lower(), sp))))
+        else:
+            await message.channel.send(random.choice(sp))
     # конец СГЛЫПЫ
     await bot.process_commands(message)
 
 
-bot.run('bebra')
+bot.run('bruh')
+
+
