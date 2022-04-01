@@ -210,7 +210,8 @@ async def on_message(message):
     for e in res:
         if message.content in e[0]:
             c += 1
-    if c == 0 and '!p' not in message.content:
+    if c == 0 and ('!' not in message.content or message.content[0] != '!') and\
+            '#' not in message.content and 'p!' not in message.content:
         cur.execute(f"""INSERT INTO {name}(mess, id) VALUES('{message.content}', {int(len(res)) + 1})""")
         if len(res) + 1 > 300:
             cur.execute(f"""DELETE from {name} WHERE id = 1""")
@@ -223,4 +224,4 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-bot.run('bebra')
+bot.run('OTU4NzExNzE0NDU3NzM1MTc4.YkRT3A.temAZKvg6paOpVdPbrgE34DlgZs')
