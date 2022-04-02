@@ -11,6 +11,7 @@ import io
 import random
 import sqlite3
 from simpledemotivators import Demotivator, Quote
+import yandex_weather_api
 
 
 bot = commands.Bot(command_prefix='!')
@@ -18,6 +19,25 @@ YDL_OPTIONS = {'format': 'worstaudio/best', 'noplaylist': 'False', 'simulate': '
                'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 queues = {}
+sl_weather = {'clear': 'ясно',
+              'partly-cloudy': 'малооблачно',
+              'cloudy': 'облачно с прояснениями',
+              'overcast': 'пасмурно',
+              'drizzle': 'морось',
+              'light-rain': 'небольшой дождь',
+              'rain': 'дождь',
+              'moderate-rain': 'умеренно сильный дождь',
+              'heavy-rain': 'сильный дождь',
+              'continuous-heavy-rain': 'длительный сильный дождь',
+              'showers': 'ливень',
+              'wet-snow': 'дождь со снегом',
+              'light-snow': 'небольшой снег',
+              'snow': 'снег',
+              'snow-showers': 'снегопад',
+              'hail': 'град',
+              'thunderstorm': 'гроза',
+              'thunderstorm-with-rain': 'дождь с грозой',
+              'thunderstorm-with-hail': 'гроза с градом'}
 
 
 def check_queue(ctx, id):
@@ -129,6 +149,22 @@ async def mem(ctx):
         await ctx.send(mem)
     except Exception:
         await ctx.reply('циферку чиркануть забыл или бред какой-то написал')
+
+
+@bot.command(name='we')
+async def we(ctx):
+    global sl_weather
+    try:
+        if ctx.message.content.split('!we')[-1] and ctx.message.content.split('!we')[-1] != ' ':
+            n = ctx.message.content.split('!we ')[-1].strip()
+            x, y = requests.get(f"http://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode={n}&format=json").json()["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["Point"]["pos"].split()
+            res = yandex_weather_api.get(requests, '5a57c893-985b-482d-a875-1f09c7151960', lat=y, lon=x)
+            embed = discord.Embed(title='Погода', description=f'Температура: {str(res["fact"]["temp"])}\nОщущается как: {str(res["fact"]["feels_like"])}\nПогодные условия: {sl_weather[str(res["fact"]["condition"])]}', colour=0x9999FF)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.reply('Ну ты город то введи')
+    except Exception:
+        await ctx.reply('Команда !we не сработала(((')
 
 
 @bot.command(name='rofl_h')
@@ -253,6 +289,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-bot.run('bruh')
+bot.run('bruuuuh')
+
 
 
