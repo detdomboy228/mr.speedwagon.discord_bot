@@ -151,6 +151,23 @@ async def mem(ctx):
         await ctx.reply('циферку чиркануть забыл или бред какой-то написал')
 
 
+@bot.command(name='h')
+async def h(ctx):
+    embed = discord.Embed(title='Все команды бота:', colour=0xffff00)
+    embed.add_field(name="!hello", value="Здоровается;", inline=False)
+    embed.add_field(name="!play или !p или !pl", value="Музыку ставит;", inline=False)
+    embed.add_field(name="!clear или !c", value="Очищает очередь из музыки;", inline=False)
+    embed.add_field(name="!skip или !s", value="Скипает музыку, которая идет сейчас;", inline=False)
+    embed.add_field(name="!leave или !l", value="Ливает из гк;", inline=False)
+    embed.add_field(name="!cit (ваша цитата);(автор)", value="Кидает пикчу прикольную;", inline=False)
+    embed.add_field(name="!mem (число)", value="Кидает шаблон для мема;", inline=False)
+    embed.add_field(name="!we (город или населенный пункт)", value="Кидает шаблон для мема;", inline=False)
+    embed.add_field(name="!rofl_h", value="Помощь по рофлам;", inline=False)
+    embed.add_field(name="!dem (ваш текст) + прикрепите картинку", value="Подписывает картинку;", inline=False)
+    embed.add_field(name="!shakal или !sh + прикрепите картинку", value="Шакалит картинку;", inline=False)
+    await ctx.send(embed=embed)
+
+
 @bot.command(name='we')
 async def we(ctx):
     global sl_weather
@@ -234,20 +251,19 @@ async def dem(ctx):
         await ctx.reply('ну ты что-то неправильно сделал')
 
 
-@bot.command(name='photo', aliases=['ph'])
-async def photo(ctx):
-    if 'шакал' in ctx.message.content:
-        try:
-            img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
-            enhancer, e1 = ImageEnhance.Sharpness(img)
-            img = enhancer.enhance(600)
-            enhancer = ImageEnhance.Brightness(img)
-            img = enhancer.enhance(0.85)
-            img.save('example.png')
-            await ctx.send(file=discord.File('example.png'))
-            os.remove('example.png')
-        except ValueError:
-            await ctx.reply('тут не RGB, дурак. я это жрать не буду!!!!')
+@bot.command(name='shakal', aliases=['sh'])
+async def shakal(ctx):
+    try:
+        img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw, mode='RGBA')
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(600)
+        enhancer = ImageEnhance.Brightness(img)
+        img = enhancer.enhance(0.85)
+        img.save('example.png')
+        await ctx.send(file=discord.File('example.png'))
+        os.remove('example.png')
+    except ValueError:
+        await ctx.reply('тут не RGB, дурак. я это жрать не буду!!!!')
 
 
 @bot.event
@@ -289,7 +305,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-bot.run('bruuuuh')
+bot.run('bruh')
 
 
 
