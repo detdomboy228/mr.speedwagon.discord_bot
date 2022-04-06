@@ -13,8 +13,15 @@ import random
 import sqlite3
 from simpledemotivators import Demotivator, Quote
 import yandex_weather_api
+import logging
+import asyncio
 
 
+# logger = logging.getLogger('discord')
+# logger.setLevel(logging.DEBUG)
+# handler = logging.StreamHandler()
+# handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+# logger.addHandler(handler)
 bot = commands.Bot(command_prefix='!')
 YDL_OPTIONS = {'format': 'worstaudio/best', 'noplaylist': 'False', 'simulate': 'True',
                'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio'}
@@ -39,6 +46,7 @@ sl_weather = {'clear': 'ясно',
               'thunderstorm': 'гроза',
               'thunderstorm-with-rain': 'дождь с грозой',
               'thunderstorm-with-hail': 'гроза с градом'}
+playing = {}
 
 
 def check_queue(ctx, id):
@@ -48,6 +56,7 @@ def check_queue(ctx, id):
                 vc = ctx.guild.voice_client
                 source = queues[id].pop(0)
                 vc.play(source, after=lambda x=0: check_queue(ctx, ctx.message.guild.id))
+                del playing[id][0]
             except IndexError:
                 pass
     except KeyError:
@@ -87,11 +96,34 @@ async def we(ctx):
         await ctx.reply('Команда !we не сработала(((', mention_author=False)
 
 
+@bot.command(name='h')
+async def h(ctx):
+    embed = discord.Embed(title='Все команды бота:', colour=0xffff00)
+    embed.add_field(name="!hello", value='Скажет "Привет";', inline=False)
+    embed.add_field(name="!play или !p или !pl (желаемая песня)", value="""Включит в вашем голосовом канале
+     желаемую музыку;""", inline=False)
+    embed.add_field(name="!clear или !c", value="Очищает очередь из музыки;", inline=False)
+    embed.add_field(name="!skip или !s", value="Пропускает музыку, которая идет сейчас;", inline=False)
+    embed.add_field(name="!leave или !l", value="Покидает голосовой канал;", inline=False)
+    embed.add_field(name="!cit (ваша цитата);(автор)", value="Оформляет цитату из введенных данных;", inline=False)
+    embed.add_field(name="!mem (число)", value="Выдает шаблон для мема;", inline=False)
+    embed.add_field(name="!mem_h", value="Выдает список самых популярных шаблонов для мемов;", inline=False)
+    embed.add_field(name="!we (город или населенный пункт)", value="""Присылает текущее состояние погоды
+     в вашем городе или населенном пункте;""", inline=False)
+    embed.add_field(name="!rofl_h", value="Помощь по рофлам;", inline=False)
+    embed.add_field(name="!rofl (число, обозначающее тип рофла)", value="""Присылает рофлянку обозначаемой введенным
+     числом категории (!rofl_h);""", inline=False)
+    embed.add_field(name="!dem (ваш текст) + прикрепите картинку", value="Подписывает картинку;", inline=False)
+    embed.add_field(name="!shakal или !sh + прикрепите картинку", value="Шакалит картинку;", inline=False)
+    await ctx.send(embed=embed)
+
+
 @bot.command(aliases=['p', 'pl'])
 async def play(ctx):
     global vc, url, ydl
     connected = ctx.author.voice
-    url = ctx.message.content.split('!p ')[-1]
+    ss = ctx.message.content.split()[0] + ' '
+    url = ctx.message.content.split(ss)[-1]
     if not connected:
         await ctx.reply("Ну сам-то зайди тоже", mention_author=False)
         return
@@ -105,10 +137,10 @@ async def play(ctx):
     else:
         info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
     arg = info['formats'][0]['url']
+    guild_id = ctx.message.guild.id
     if vc.is_playing():
         a = ydl.extract_info(f"ytsearch:{url}", download=False)
         b = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
-        guild_id = ctx.message.guild.id
         if guild_id in queues:
             queues[guild_id].append((FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS)))
         else:
@@ -132,7 +164,7 @@ async def play(ctx):
 
         else:
             embed.add_field(name="Длительность: ",
-                            value=b['duration'] + ' c.')
+                            value=str(b['duration']) + ' c.')
         await ctx.reply(embed=embed, mention_author=False)
     else:
         a = ydl.extract_info(f"ytsearch:{url}", download=False)
@@ -158,8 +190,12 @@ async def play(ctx):
 
         else:
             embed.add_field(name="Длительность: ",
-                            value=b['duration'] + ' c.')
+                            value=str(b['duration']) + ' c.')
         await ctx.reply(embed=embed, mention_author=False)
+    if guild_id in playing:
+        playing[guild_id].append(url)
+    else:
+        playing[guild_id] = [url]
 
 
 @bot.command(aliases=['c'])
@@ -174,9 +210,10 @@ async def clear(ctx):
 @bot.command(aliases=['s'])
 async def skip(ctx):
     try:
-        global queues, url, ydl
+        global queues,  ydl
         vc = ctx.guild.voice_client
         vc.stop()
+        url = playing[ctx.message.guild.id][0]
         embed = discord.Embed(title="Песня была успешно пропущена!",
                               description=ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]['title'],
                               colour=0xff0000)
@@ -216,13 +253,32 @@ async def cit(ctx):
 @bot.command(name='mem')
 async def mem(ctx):
     try:
-        n = int(ctx.message.content.split()[-1])
+        n = int(ctx.message.content.split()[-1]) - 1
         res = (requests.get('https://api.imgflip.com/get_memes')).json()
+        print(res)
         mem = res['data']['memes'][n]['url']
         await ctx.reply(mem, mention_author=False)
     except Exception:
         await ctx.reply('Видимо, ты забыл написать цифру после команды или же просто допустил ошибку(',
                         mention_author=False)
+
+
+@bot.command(name='mem_h')
+async def mem_h(ctx):
+    try:
+        n = int(ctx.message.content.split()[-1]) - 1
+        res = (requests.get('https://api.imgflip.com/get_memes')).json()
+        embed = discord.Embed(title='Текущий "топ" мемов:',
+                              colour=0xff0000)
+        c = 1
+        print(res)
+        for i, e in enumerate(res['data']['memes']):
+            if (i + 1 >= n * 10) and (i + 1 <= n * 10 + 10):
+                embed.add_field(name=str(c) + '. ', value=e['name'], inline=False)
+            c += 1
+        await ctx.reply(embed=embed, mention_author=False)
+    except Exception:
+        await ctx.reply('Возможно, ты забыл написать цифру-номер страницы', mention_author=False)
 
 
 @bot.command(name='rofl_h')
@@ -292,20 +348,21 @@ async def dem(ctx):
         await ctx.reply('ну ты что-то неправильно сделал', mention_author=False)
 
 
-@bot.command(name='photo', aliases=['ph'])
-async def photo(ctx):
-    if 'шакал' in ctx.message.content:
-        try:
-            img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
-            enhancer = ImageEnhance.Sharpness(img)
-            img = enhancer.enhance(600)
-            enhancer = ImageEnhance.Brightness(img)
-            img = enhancer.enhance(0.85)
-            img.save('example.png')
-            await ctx.reply(file=discord.File('example.png'), mention_author=False)
-            os.remove('example.png')
-        except ValueError:
-            await ctx.reply('тут не RGB, дурак. я это жрать не буду!!!!', mention_author=False)
+@bot.command(name='shakal', aliases=['sh'])
+async def shakal(ctx):
+    try:
+        img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
+        if img.size[0] > 2000 or img.size[-1] > 2000:
+            img = img.resize((int(img.size[0] * 0.5), int(img.size[-1] * 0.5)))
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(600)
+        enhancer = ImageEnhance.Brightness(img)
+        img = enhancer.enhance(0.85)
+        img.save('example.png')
+        await ctx.reply(file=discord.File('example.png'), mention_author=False)
+        os.remove('example.png')
+    except ValueError:
+        await ctx.reply('тут не RGB, дурак. я это жрать не буду!!!!', mention_author=False)
 
 
 @bot.event
@@ -313,7 +370,7 @@ async def on_message(message):
     global cur, db
     if message.author == bot.user:
         return
-    elif ('пошел нахуй' in message.content.lower() or 'пошёл нахуй' in message.content.lower()) and \
+    elif ('пошел отсюда' in message.content.lower() or 'пошёл отсюда' in message.content.lower()) and \
             'бот' in message.content.lower():
         await message.channel.send('слушаюсь, мой господин')
     elif 'джозеф худший джоджо' in message.content.lower():
