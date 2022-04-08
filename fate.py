@@ -23,10 +23,11 @@ import asyncio
 # handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 # logger.addHandler(handler)
 bot = commands.Bot(command_prefix='!')
-YDL_OPTIONS = {'format': 'worstaudio/best', 'noplaylist': 'False', 'simulate': 'True',
+YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'False', 'simulate': 'True',
                'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 queues = {}
+queues_n = {}
 sl_weather = {'clear': 'ясно',
               'partly-cloudy': 'малооблачно',
               'cloudy': 'облачно с прояснениями',
@@ -46,21 +47,31 @@ sl_weather = {'clear': 'ясно',
               'thunderstorm': 'гроза',
               'thunderstorm-with-rain': 'дождь с грозой',
               'thunderstorm-with-hail': 'гроза с градом'}
-playing = {}
+prev = {}
 
 
 def check_queue(ctx, id):
+    global prev, queues_n
     try:
         if queues[id] != {}:
             try:
                 vc = ctx.guild.voice_client
                 source = queues[id].pop(0)
                 vc.play(source, after=lambda x=0: check_queue(ctx, ctx.message.guild.id))
-                del playing[id][0]
+                prev[id] = source
+                del queues_n[id][0]
+                print(prev[ctx.message.guild.id])
             except IndexError:
                 pass
     except KeyError:
         pass
+
+
+def easy_convert(name):
+    info = ydl.extract_info(f"ytsearch:{name}", download=False)['entries'][0]
+    arg = info['formats'][0]['url']
+    a = (FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))
+    return a
 
 
 @bot.event
@@ -97,7 +108,7 @@ async def we(ctx):
 
 
 @bot.command(name='h')
-async def h(ctx):
+async def help(ctx):
     embed = discord.Embed(title='Все команды бота:', colour=0xffff00)
     embed.add_field(name="!hello", value='Скажет "Привет";', inline=False)
     embed.add_field(name="!play или !p или !pl (желаемая песня)", value="""Включит в вашем голосовом канале
@@ -116,6 +127,21 @@ async def h(ctx):
     embed.add_field(name="!dem (ваш текст) + прикрепите картинку", value="Подписывает картинку;", inline=False)
     embed.add_field(name="!shakal или !sh + прикрепите картинку", value="Шакалит картинку;", inline=False)
     await ctx.send(embed=embed)
+
+
+@bot.command(name='back', aliases=['b'])
+async def back(ctx):
+    global queues_n, prev
+    vc = ctx.guild.voice_client
+    if vc.is_playing():
+        vc.stop()
+        s = prev[ctx.message.guild.id]
+        prev[ctx.message.guild.id] = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])
+        vc.play(s)
+    else:
+        source = prev[ctx.message.guild.id]
+        prev[ctx.message.guild.id] = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])
+        vc.play(source)
 
 
 @bot.command(aliases=['p', 'pl'])
@@ -138,6 +164,8 @@ async def play(ctx):
         info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
     arg = info['formats'][0]['url']
     guild_id = ctx.message.guild.id
+    if guild_id not in queues_n:
+        queues_n[guild_id] = []
     if vc.is_playing():
         a = ydl.extract_info(f"ytsearch:{url}", download=False)
         b = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
@@ -158,13 +186,16 @@ async def play(ctx):
                 ost_m = m - ch * 60
                 embed.add_field(name="Длительность: ",
                                 value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
+                queues_n[guild_id].append(b['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
             else:
                 embed.add_field(name="Длительность: ",
                                 value=str(m) + ' м. ' + str(s) + ' c.')
+                queues_n[guild_id].append(b['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')
 
         else:
             embed.add_field(name="Длительность: ",
                             value=str(b['duration']) + ' c.')
+            queues_n[guild_id].append(b['title'] + ' --- ' + str(b['duration']) + ' c.')
         await ctx.reply(embed=embed, mention_author=False)
     else:
         a = ydl.extract_info(f"ytsearch:{url}", download=False)
@@ -184,43 +215,56 @@ async def play(ctx):
                 ost_m = m - ch * 60
                 embed.add_field(name="Длительность: ",
                                 value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
+                queues_n[guild_id].append(b['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
             else:
                 embed.add_field(name="Длительность: ",
                                 value=str(m) + ' м. ' + str(s) + ' c.')
+                queues_n[guild_id].append(b['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')
 
         else:
             embed.add_field(name="Длительность: ",
                             value=str(b['duration']) + ' c.')
+            queues_n[guild_id].append(b['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')
         await ctx.reply(embed=embed, mention_author=False)
-    if guild_id in playing:
-        playing[guild_id].append(url)
-    else:
-        playing[guild_id] = [url]
 
 
 @bot.command(aliases=['c'])
 async def clear(ctx):
-    global queues
+    global queues, queues_n
     queues = {}
+    queues_n = {}
     embed = discord.Embed(title="Очередь была полностью очищена!",
                           colour=0xff0000)
     await ctx.reply(embed=embed, mention_author=False)
 
 
-@bot.command(aliases=['s'])
+@bot.command(aliases=['s', 'ы'])
 async def skip(ctx):
     try:
         global queues,  ydl
         vc = ctx.guild.voice_client
-        vc.stop()
-        url = playing[ctx.message.guild.id][0]
-        embed = discord.Embed(title="Песня была успешно пропущена!",
-                              description=ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]['title'],
-                              colour=0xff0000)
-        await ctx.reply(embed=embed, mention_author=False)
-
+        if vc.is_playing():
+            vc.stop()
+            prev[ctx.message.guild.id] = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])
+            embed = discord.Embed(title="Песня была успешно пропущена!",
+                                  description=queues_n[ctx.message.guild.id][0].split(' --- ')[0],
+                                  colour=0xff0000)
+            await ctx.reply(embed=embed, mention_author=False)
     except IndexError:
         pass
+
+
+@bot.command(aliases=['q'])
+async def queue(ctx):
+    global queues_n
+    q = queues_n[ctx.message.guild.id]
+    embed = discord.Embed(title='Текущая очередь из песен:', colour=0xff0000)
+    for i, e in enumerate(q):
+        if i == 0:
+            embed.add_field(name='Играет прямо сейчас:', value=e, inline=False)
+        else:
+            embed.add_field(name=str(i) + ' - ', value=e, inline=False)
+    await ctx.reply(embed=embed, mention_author=False)
 
 
 @bot.command(aliases=['l'])
@@ -291,14 +335,14 @@ async def rofl_h(ctx):
                 4 - Афоризмы;
                 5 - Цитаты;
                 6 - Тосты;
-                8 - Статусы;
-                11 - Анекдот (+18);
-                12 - Рассказы (+18);
-                13 - Стишки (+18);
-                14 - Афоризмы (+18);
-                15 - Цитаты (+18);
-                16 - Тосты (+18);
-                18 - Статусы (+18);""", colour=0xff0000)
+                7 - Статусы;
+                8 - Анекдот (+18);
+                9 - Рассказы (+18);
+                10 - Стишки (+18);
+                11 - Афоризмы (+18);
+                12 - Цитаты (+18);
+                13 - Тосты (+18);
+                14 - Статусы (+18);""", colour=0xff0000)
         await ctx.reply(embed=embed, mention_author=False)
     except Exception:
         await ctx.reply('Команда rofl_h не сработала(((', mention_author=False)
@@ -375,6 +419,24 @@ async def on_message(message):
         await message.channel.send('слушаюсь, мой господин')
     elif 'джозеф худший джоджо' in message.content.lower():
         await message.channel.send('полностью согласен!!!\nсамый крутой Джотаро')
+    #################################
+    elif 'кот' in message.content.lower() or 'кош' in message.content.lower():
+        r = requests.get('https://api.thecatapi.com/v1/images/search').json()[0]['url']
+        await message.channel.send(r)
+    elif 'собак' in message.content.lower():
+        r = requests.get('https://dog.ceo/api/breeds/image/random').json()['message']
+        await message.channel.send(r)
+    elif 'set timer in' in message.content.lower():
+        try:
+            h, m = int(message.content.lower().split('set timer in ')[-1].split('hours')[0]), \
+                   int(message.content.lower().split('set timer in ')[-1].split()[2])
+            s = h * 60 * 60 + m * 60
+            await message.channel.send(f'The timer should start in {str(h)} hours and {str(m)} minutes.')
+            await asyncio.sleep(s)
+            await message.channel.send('Time X has come!')
+        except Exception:
+            pass
+    #################################
     else:
         pass
     # вот тут СГЛЫПА
