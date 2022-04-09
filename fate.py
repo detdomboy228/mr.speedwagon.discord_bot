@@ -69,9 +69,9 @@ def check_queue(ctx, id):
 
 def easy_convert(name):
     info = ydl.extract_info(f"ytsearch:{name}", download=False)['entries'][0]
-    arg = info['formats'][0]['url']
-    a = (FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))
-    return a
+    arg = info['formats'][0]
+    a = (FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg['url'], **FFMPEG_OPTIONS))
+    return a, arg
 
 
 @bot.event
@@ -136,12 +136,21 @@ async def back(ctx):
     if vc.is_playing():
         vc.stop()
         s = prev[ctx.message.guild.id]
-        prev[ctx.message.guild.id] = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])
+        prev[ctx.message.guild.id] = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])[0]
         vc.play(s)
+        sss = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])[-1]
+        embed = discord.embed(title='Отмотано к:', colour=0xff0000, url=sss['url'], description=sss['title'])
+        embed.set_author(name=sss['uploader'])
+        embed.set_thumbnail(url=sss['thumbnails'][0]['url'])
+        await ctx.reply(embed=embed, mention_author=False)
     else:
         source = prev[ctx.message.guild.id]
-        prev[ctx.message.guild.id] = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])
+        prev[ctx.message.guild.id] = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])[0]
         vc.play(source)
+        embed = discord.embed(title='Отмотано к:', colour=0xff0000, url=sss['url'], description=sss['title'])
+        embed.set_author(name=sss['uploader'])
+        embed.set_thumbnail(url=sss['thumbnails'][0]['url'])
+        await ctx.reply(embed=embed, mention_author=False)
 
 
 @bot.command(aliases=['p', 'pl'])
@@ -245,7 +254,7 @@ async def skip(ctx):
         vc = ctx.guild.voice_client
         if vc.is_playing():
             vc.stop()
-            prev[ctx.message.guild.id] = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])
+            prev[ctx.message.guild.id] = easy_convert(queues_n[ctx.message.guild.id][0].split(' --- ')[0])[0]
             embed = discord.Embed(title="Песня была успешно пропущена!",
                                   description=queues_n[ctx.message.guild.id][0].split(' --- ')[0],
                                   colour=0xff0000)
@@ -258,6 +267,7 @@ async def skip(ctx):
 async def queue(ctx):
     global queues_n
     q = queues_n[ctx.message.guild.id]
+    print(q)
     embed = discord.Embed(title='Текущая очередь из песен:', colour=0xff0000)
     for i, e in enumerate(q):
         if i == 0:
