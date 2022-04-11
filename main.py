@@ -15,6 +15,9 @@ from simpledemotivators import Demotivator, Quote
 import yandex_weather_api
 import logging
 import asyncio
+# -*- coding: utf-8 -*-
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPM
 
 
 # logger = logging.getLogger('discord')
@@ -99,9 +102,14 @@ async def we(ctx):
             x, y = requests.get(f"http://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode={n}&format=json").json()["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["Point"]["pos"].split()
             res = yandex_weather_api.get(requests, '5a57c893-985b-482d-a875-1f09c7151960', lat=y, lon=x)
             embed = discord.Embed(title='Погода',
-                                  description=f'Температура: {str(res["fact"]["temp"])}\nОщущается как: {str(res["fact"]["feels_like"])}\nПогодные условия: {sl_weather[str(res["fact"]["condition"])]}', colour=0x9999FF)
-            embed.set_author(name='Яндекс.Погода', icon_url=f'https://yastatic.net/weather/i/icons/funky/dark/{res["fact"]["icon"]}.svg')
-            print(f'https://yastatic.net/weather/i/icons/funky/dark/{res["fact"]["icon"]}.svg')
+                                  description=f'Температура: {str(res["fact"]["temp"])}\nОщущается как: {str(res["fact"]["feels_like"])}\nПогодные условия: {sl_weather[str(res["fact"]["condition"])]}\nВлажность: {str(res["fact"]["humidity"]) + "%"}\nСкорость ветра: {str(res["fact"]["wind_speed"]) + " М/С"}', colour=0x9999FF)
+            embed.set_author(name='Яндекс.Погода', icon_url=f'https://yastatic.net/s3/home-static/_/37/37a02b5dc7a51abac55d8a5b6c865f0e.png')
+            # resp = requests.get(f'https://yastatic.net/weather/i/icons/funky/dark/{res["fact"]["icon"]}.svg')
+            # img = open('123.svg', mode='wb')
+            # img.write(resp.content)
+            # img.close()
+            # drawing = svg2rlg('123.svg')
+            # renderPM.drawToFile(drawing, '123.jpg', fmt='JPEG')
             await ctx.send(embed=embed)
         else:
             await ctx.reply('Ну ты город-то введи', mention_author=False)
@@ -484,4 +492,4 @@ async def mem(ctx):
 #     await bot.process_commands(message)
 
 
-bot.run('bebra')
+bot.run('ббббббеееебббббррррраааа')
