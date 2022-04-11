@@ -120,6 +120,7 @@ async def help(ctx):
     embed.add_field(name="!leave или !l", value="Покидает голосовой канал;", inline=False)
     embed.add_field(name="!cit (ваша цитата);(автор)", value="Оформляет цитату из введенных данных;", inline=False)
     embed.add_field(name="!mem (число)", value="Выдает шаблон для мема;", inline=False)
+    embed.add_field(name="!mem (число) /m (ваш текст) /r (ваш текст)", value="Создает мем и подписывает его;", inline=False)
     embed.add_field(name="!mem_h", value="Выдает список самых популярных шаблонов для мемов;", inline=False)
     embed.add_field(name="!we (город или населенный пункт)", value="""Присылает текущее состояние погоды
      в вашем городе или населенном пункте;""", inline=False)
