@@ -1,3 +1,5 @@
+from data import db_session
+from data.users import User
 import discord
 import pprint
 from discord.ext import commands
@@ -75,7 +77,7 @@ def check_queue(ctx, id):
 
 @bot.command(name='back', aliases=['b'])
 async def back(ctx):
-    global queues_n, queues, prev, prev_n
+    global queues_n, queues, prev, prev_n, now
     id = ctx.message.guild.id
     a = easy_convert(prev_n[id])[0]
     b = prev_n[id]
@@ -85,8 +87,27 @@ async def back(ctx):
                           description=sss['title'])
     embed.set_author(name=sss['uploader'])
     embed.set_thumbnail(url=sss['thumbnails'][0]['url'])
-    queues[id] = [a] + queues[id]
-    queues_n[id] = [b] + queues_n[id]
+    if int(sss['duration']) > 60:
+        m = int(sss['duration']) // 60
+        s = int(sss['duration']) - int(sss['duration']) // 60 * 60
+        if m > 60:
+            ch = m // 60
+            ost_m = m - ch * 60
+            embed.add_field(name="Длительность: ",
+                            value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
+            queues_n[id].append(
+                sss['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
+        else:
+            embed.add_field(name="Длительность: ",
+                            value=str(m) + ' м. ' + str(s) + ' c.')
+            queues_n[id].append(sss['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')
+
+    else:
+        embed.add_field(name="Длительность: ",
+                        value=str(sss['duration']) + ' c.')
+        queues_n[id].append(sss['title'] + ' --- ' + str(sss['duration']) + ' c.')
+    queues[id] = [a] + [easy_convert(now[id])[0]] + queues[id][1:]
+    queues_n[id] = [b] + [now[id]] + queues_n[id][1:]
     vc.stop()
     await ctx.reply(embed=embed, mention_author=False)
 
@@ -154,8 +175,8 @@ async def help(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(aliases=['p', 'pl'])
-async def play(ctx):
+@bot.command(aliases=['pl'])
+async def p(ctx):
     global vc, url, ydl, queues_n, queues
     connected = ctx.author.voice
     ss = ctx.message.content.split()[0] + ' '
@@ -177,17 +198,16 @@ async def play(ctx):
     if guild_id not in queues_n:
         queues_n[guild_id] = []
     if vc.is_playing():
-        a = ydl.extract_info(f"ytsearch:{url}", download=False)
-        b = a['entries'][0]
+        b = info
         if guild_id in queues:
             queues[guild_id].append((FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS)))
         else:
             queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
         embed = discord.Embed(title="Добавлено в очередь:", url=b['webpage_url'],
-                              description=a['entries'][0]['title'],
+                              description=b['title'],
                               colour=0xff0000)
-        embed.set_author(name=a['entries'][0]['uploader'])
-        embed.set_thumbnail(url=a['entries'][0]['thumbnails'][0]['url'])
+        embed.set_author(name=b['uploader'])
+        embed.set_thumbnail(url=b['thumbnails'][0]['url'])
         if int(b['duration']) > 60:
             m = int(b['duration']) // 60
             s = int(b['duration']) - int(b['duration']) // 60 * 60
@@ -208,13 +228,12 @@ async def play(ctx):
             queues_n[guild_id].append(b['title'] + ' --- ' + str(b['duration']) + ' c.')
         await ctx.reply(embed=embed, mention_author=False)
     else:
-        a = ydl.extract_info(f"ytsearch:{url}", download=False)
-        b = a['entries'][0]
+        b = info
         embed = discord.Embed(title="Сейчас играет:", url=b['webpage_url'],
-                              description=a['entries'][0]['title'],
+                              description=b['title'],
                               colour=0xff0000)
-        embed.set_author(name=a['entries'][0]['uploader'])
-        embed.set_thumbnail(url=a['entries'][0]['thumbnails'][0]['url'])
+        embed.set_author(name=b['uploader'])
+        embed.set_thumbnail(url=b['thumbnails'][0]['url'])
         if int(b['duration']) > 60:
             m = int(b['duration']) // 60
             s = int(b['duration']) - int(b['duration']) // 60 * 60
@@ -239,6 +258,72 @@ async def play(ctx):
             queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
         check_queue(ctx, guild_id)
         await ctx.reply(embed=embed, mention_author=False)
+
+
+@bot.command()
+async def play(ctx):
+    global vc, url, ydl, queues_n, queues
+    connected = ctx.author.voice
+    ss = ctx.message.content.split()[0] + ' '
+    url = ctx.message.content.split(ss)[-1]
+    if not connected:
+        await ctx.reply("Ну сам-то зайди тоже", mention_author=False)
+        return
+    if not ctx.voice_client:
+        vc = await connected.channel.connect()
+    else:
+        vc = ctx.guild.voice_client
+    ydl = YoutubeDL(YDL_OPTIONS)
+    if 'https://' in url:
+        info = ydl.extract_info(url, download=False)
+    else:
+        info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+    arg = info['formats'][0]['url']
+    guild_id = ctx.message.guild.id
+    if guild_id not in queues_n:
+        queues_n[guild_id] = []
+    b = info
+    if guild_id in queues:
+        queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))] + \
+                           queues[guild_id]
+    else:
+        queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
+    if vc.is_playing():
+        vc.stop()
+    embed = discord.Embed(title="Сейчас заиграет:", url=b['webpage_url'],
+                          description=b['title'],
+                          colour=0xff0000)
+    embed.set_author(name=b['uploader'])
+    embed.set_thumbnail(url=b['thumbnails'][0]['url'])
+    if int(b['duration']) > 60:
+        m = int(b['duration']) // 60
+        s = int(b['duration']) - int(b['duration']) // 60 * 60
+        if m > 60:
+            ch = m // 60
+            ost_m = m - ch * 60
+            embed.add_field(name="Длительность: ",
+                            value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
+            if guild_id in queues_n:
+                queues_n[guild_id] = [(b['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')] \
+                                     + queues_n[guild_id]
+            else:
+                queues_n[guild_id] = [(b['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')]
+        else:
+            embed.add_field(name="Длительность: ",
+                            value=str(m) + ' м. ' + str(s) + ' c.')
+            if guild_id in queues_n:
+                queues_n[guild_id] = [(b['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')] + queues_n[guild_id]
+            else:
+                queues_n[guild_id] = [(b['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')]
+
+    else:
+        embed.add_field(name="Длительность: ",
+                        value=str(b['duration']) + ' c.')
+        if guild_id in queues_n:
+            queues_n[guild_id] = [(b['title'] + ' --- ' + str(b['duration']) + ' c.')] + queues_n[guild_id]
+        else:
+            queues_n[guild_id] = [(b['title'] + ' --- ' + str(b['duration']) + ' c.')]
+    await ctx.reply(embed=embed, mention_author=False)
 
 
 @bot.command(aliases=['c'])
@@ -479,31 +564,29 @@ async def on_message(message):
     else:
         pass
     # вот тут СГЛЫПА
-    name = message.guild.name
-    cur.execute(f"""CREATE TABLE IF NOT EXISTS {name}(mess STR, id INT)""")
-    db.commit()
-    res = cur.execute(f"""SELECT * FROM {name}""").fetchall()
-    c = 0
-    for e in res:
-        if str(message.content) == e[0]:
-            c += 1
-    if c == 0 and ('!' not in message.content or message.content[0] != '!') and\
-            '#' not in message.content and 'p!' not in message.content:
-        cur.execute(f"""INSERT INTO {name}(mess, id) VALUES('{str(message.content)}', {int(len(res)) + 1})""")
-        if len(res) + 1 > 500:
-            cur.execute(f"""DELETE from {name} WHERE id = 1""")
-            cur.execute(f"""UPDATE {name} SET id = id - 1""")
-        db.commit()
-    sp = [e[0] for e in cur.execute(f"""SELECT * FROM {name}""").fetchall()]
-
-    if len(sp) >= 500 and random.choice([0, 1, 2, 3]) == 3:
-        if list(filter(lambda x: message.content.lower() in str(x).lower(), sp)):
-            await message.channel.send(random.choice(list(filter(lambda x:
-                                                                 message.content.lower() in str(x).lower(), sp))))
-        else:
-            await message.channel.send(random.choice(sp))
+    db_sess = db_session.create_session()
+    if len(db_sess.query(User).all()) < 500:
+        if message.content:
+            user = User()
+            user.name = message.author.name + message.author.discriminator
+            user.message = message.content
+            db_sess.add(user)
+            db_sess.commit()
+    else:
+        db_sess.query(User).filter(User.id == 1).delete()
+        db_sess.commit()
+        for userr in db_sess.query(User).all():
+            userr.id -= 1
+        user = User()
+        user.name = message.author.name + message.author.discriminator
+        user.message = message.content
+        db_sess.add(user)
+        db_sess.commit()
+        await message.channel.send(random.choice(db_sess.query(User).filter(User.message.in_(message.content.split()) | User.message.like('%' + message.content + '%')).all()).message)
     # конец СГЛЫПЫ
     await bot.process_commands(message)
 
 
-bot.run('berba')
+if __name__ == '__main__':
+    db_session.global_init("db/blogs.db")
+    bot.run('berba')
