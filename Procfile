@@ -1,1 +1,1 @@
-web: python fate.py
+worker: python fate.py
