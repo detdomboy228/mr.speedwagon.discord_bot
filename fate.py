@@ -12,13 +12,13 @@ import json
 import requests
 import io
 import random
-import sqlite3
 from simpledemotivators import Demotivator, Quote
 import yandex_weather_api
 import logging
 import asyncio
+from dotenv import load_dotenv
 
-
+load_dotenv()
 # logger = logging.getLogger('discord')
 # logger.setLevel(logging.DEBUG)
 # handler = logging.StreamHandler()
@@ -123,10 +123,6 @@ def easy_convert(name):
 async def on_ready():
     global cur, db
     print('We have logged in as {0.user}'.format(bot))
-    db = sqlite3.connect('ans.db')
-    cur = db.cursor()
-    if db:
-        print('Database connected successfully')
 
 
 @bot.command(aliases=['Hello'])
@@ -589,4 +585,4 @@ async def on_message(message):
 
 if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
-    bot.run('berba')
+    bot.run(os.getenv('TOKEN'))
