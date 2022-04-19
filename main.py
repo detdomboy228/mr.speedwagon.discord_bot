@@ -1,12 +1,4 @@
-# from data import db_session
-#
-#
-# def main():
-#     db_session.global_init("db/blogs.db")
-#
-#
-# if __name__ == '__main__':
-#     main()
+
 from data import db_session
 from data.users import User
 import discord
@@ -15,7 +7,7 @@ from discord.ext import commands
 from discord import FFmpegPCMAudio, voice_client
 from discord.utils import get
 from youtube_dl import YoutubeDL
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 import os
 import json
 import requests
@@ -424,39 +416,58 @@ async def rofl(ctx):
         await ctx.reply('категории смешнявок можно изучить, вызвав команду !rofl_h', mention_author=False)
 
 
-@bot.command(name='dem')
-async def dem(ctx):
+@bot.command(name='egor_konch')
+async def egor_konch(ctx):
     try:
         img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
         img.save('example.png')
-        if ';' in ctx.message.content:
-            dem = Demotivator(ctx.message.content.split('!dem ')[-1].split(';')[0],
-                              ctx.message.content.split('!dem ')[-1].split(';')[-1])
-        else:
-            dem = Demotivator(ctx.message.content.split('!dem ')[-1], '')
-        dem.create('example.png', result_filename='bebra.png')
-        await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
-        os.remove('example.png')
+        if ctx.message.content.split()[1] == 'dem':
+            if ';' in ctx.message.content:
+                dem = Demotivator(ctx.message.content.split('!egor_konch dem')[-1].split(';')[0],
+                                  ctx.message.content.split('!egor_konch dem')[-1].split(';')[-1])
+            else:
+                dem = Demotivator(ctx.message.content.split('!egor_konch dem')[-1], '')
+            dem.create('example.png', result_filename='bebra.png')
+            await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
+        elif ctx.message.content.split()[1] == 'b-w':
+            img = img.convert('L')
+            img.save('bebra.png')
+            await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
+        elif ctx.message.content.split()[1] == 'quantize':
+            img = img.quantize(10)
+            img.save('bebra.png')
+            await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
+        elif ctx.message.content.split()[1] == 'megatron':
+            img = img.filter(ImageFilter.GaussianBlur(radius=2))
+            img.save('bebra.png')
+            await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
+        elif ctx.message.content.split()[1] == 'invert':
+            img = ImageOps.invert(img)
+            img.save('bebra.png')
+            await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
+        elif ctx.message.content.split()[1] == 'cit':
+            if len(ctx.message.content.split('!egor_konch cit ')[-1].split(';')) == 2:
+                a = Quote(ctx.message.content.split('!egor_konch cit ')[-1].split(';')[0],
+                          ctx.message.content.split('!egor_konch cit ')[-1].split(';')[-1])
+            else:
+                a = Quote(ctx.message.content.split('!egor_konch cit ')[-1].split(';')[0], 'неизвестный мыслитель')
+            a.create('example.png', result_filename='bebra.png')
+            await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
+        elif ctx.message.content.split()[1] == 'sh' or ctx.message.content.split()[1] == 'shakal':
+            if img.size[0] > 2000 or img.size[-1] > 2000:
+                img = img.resize((int(img.size[0] * 0.5), int(img.size[-1] * 0.5)))
+            enhancer = ImageEnhance.Sharpness(img)
+            img = enhancer.enhance(600)
+            enhancer = ImageEnhance.Brightness(img)
+            img = enhancer.enhance(0.85)
+            img.save('example.png')
+            await ctx.reply(file=discord.File('example.png'), mention_author=False)
         os.remove('bebra.png')
-    except Exception:
-        await ctx.reply('ну ты что-то неправильно сделал', mention_author=False)
-
-
-@bot.command(name='shakal', aliases=['sh'])
-async def shakal(ctx):
-    try:
-        img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
-        if img.size[0] > 2000 or img.size[-1] > 2000:
-            img = img.resize((int(img.size[0] * 0.5), int(img.size[-1] * 0.5)))
-        enhancer = ImageEnhance.Sharpness(img)
-        img = enhancer.enhance(600)
-        enhancer = ImageEnhance.Brightness(img)
-        img = enhancer.enhance(0.85)
-        img.save('example.png')
-        await ctx.reply(file=discord.File('example.png'), mention_author=False)
         os.remove('example.png')
     except ValueError:
         await ctx.reply('тут не RGB, дурак. я это жрать не буду!!!!', mention_author=False)
+    except Exception:
+        await ctx.reply('ну ты что-то неправильно сделал', mention_author=False)
 
 
 @bot.event
