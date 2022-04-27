@@ -6,7 +6,7 @@ from discord.ext import commands
 from discord import FFmpegPCMAudio, voice_client
 from discord.utils import get
 from youtube_dl import YoutubeDL
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageOps, ImageFilter
 import os
 import json
 import requests
@@ -19,14 +19,15 @@ import asyncio
 from dotenv import load_dotenv
 
 load_dotenv()
-# logger = logging.getLogger('discord')
-# logger.setLevel(logging.DEBUG)
-# handler = logging.StreamHandler()
-# handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-# logger.addHandler(handler)
+logger = logging.getLogger('discord')
+logger.setLevel(logging.WARNING)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
 bot = commands.Bot(command_prefix='!')
 YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'False', 'simulate': 'True',
-               'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio', 'quiet': True}
+               'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio',
+               'logger': logger}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 queues = {}
 queues_n = {}
@@ -57,8 +58,8 @@ prev_n = {}
 def check_queue(ctx, id):
     global queues_n, queues, prev, prev_n, now
     if queues[id] != {}:
+        vc = ctx.guild.voice_client
         try:
-            vc = ctx.guild.voice_client
             source = queues[id][0]
             if id not in now:
                 prev_n[id] = 'rick astley - never gonna give you up --- 3 м. 32 с.'
@@ -71,11 +72,14 @@ def check_queue(ctx, id):
             del queues_n[id][0]
             del queues[id][0]
         except IndexError:
-            queues[id] = []
+            prev_n[id] = now[id]
+            prev[id] = easy_convert(now[id])[0]
             queues_n[id] = []
+            queues[id] = []
 
 
 def easy_convert(name):
+    name = name.split(' --- ')[0]
     info = ydl.extract_info(f"ytsearch:{name}", download=False)['entries'][0]
     arg = info['formats'][0]
     a = (FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg['url'], **FFMPEG_OPTIONS))
@@ -132,11 +136,9 @@ async def on_message(message):
         db_sess.add(user)
         db_sess.commit()
     # конец СГЛЫПЫ
-    # р-ции начало
     if random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) == 3:
         sp = ['👎', '👍', '😭', '😎', '😋', '😠', '🤮'] + [bot.get_emoji(e.id) for e in message.guild.emojis]
         await message.add_reaction(random.choice(sp))
-    # р-ции конец
     await bot.process_commands(message)
 
 
@@ -154,10 +156,16 @@ class Speedwagon(commands.Cog):
     async def back(self, ctx):
         global queues_n, queues, prev, prev_n, now
         id = ctx.message.guild.id
-        a = easy_convert(prev_n[id])[0]
+        try:
+            a = easy_convert(prev_n[id])[0]
+        except KeyError:
+            a = easy_convert('rick astley - never gonna give you up')[0]
         b = prev_n[id]
-        sss = easy_convert(prev_n[id])[-1]
-        pprint.pp(sss)
+        try:
+            sss = easy_convert(prev_n[id])[-1]
+        except Exception as e:
+            await ctx.reply(discord.Embed(title='Ошибка воспроизведения:', colour=0xff0000,
+                                          description=str(e)), mention_author=False)
         embed = discord.Embed(title='Отмотано к:', colour=0xff0000, url=sss['webpage_url'],
                               description=sss['title'])
         embed.set_author(name=sss['uploader'])
@@ -181,10 +189,19 @@ class Speedwagon(commands.Cog):
             embed.add_field(name="Длительность: ",
                             value=str(sss['duration']) + ' c.')
             queues_n[id].append(sss['title'] + ' --- ' + str(sss['duration']) + ' c.')
-        queues[id] = [a] + [easy_convert(now[id])[0]] + queues[id][1:]
-        queues_n[id] = [b] + [now[id]] + queues_n[id][1:]
+        if len(queues[id]) >= 1:
+            queues[id] = [a] + [easy_convert(now[id])[0]] + queues[id][:-1]
+            queues_n[id] = [b] + [now[id]] + queues_n[id][:-1]
+            print('------------------------------------------------')
+        else:
+            queues[id] = [a]
+            queues_n[id] = [b]
+        prev[id] = easy_convert(now[id])[0]
+        prev_n[id] = now[id]
+        print(prev_n[id])
         vc.stop()
-        await ctx.reply(embed=embed, mention_author=False)
+        mes = await ctx.reply(embed=embed, mention_author=False)
+        await mes.add_reaction('✅')
 
     @commands.command(name='we')
     async def we(self, ctx):
@@ -228,11 +245,11 @@ class Speedwagon(commands.Cog):
                 img = img.quantize(10)
                 img.save('bebra.png')
                 await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
-            elif ctx.message.content.split()[1] == 'megatron':
+            elif ctx.message.content.split()[1] == 'blur':
                 img = img.filter(ImageFilter.GaussianBlur(radius=2))
                 img.save('bebra.png')
                 await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
-            elif ctx.message.content.split()[1] == 'invert':
+            elif ctx.message.content.split()[1] == 'negative':
                 img = ImageOps.invert(img)
                 img.save('bebra.png')
                 await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
@@ -271,7 +288,6 @@ class Speedwagon(commands.Cog):
         embed.add_field(name="!clear или !c", value="Очищает очередь из музыки;", inline=False)
         embed.add_field(name="!skip или !s", value="Пропускает музыку, которая идет сейчас;", inline=False)
         embed.add_field(name="!leave или !l", value="Покидает голосовой канал;", inline=False)
-        embed.add_field(name="!cit (ваша цитата);(автор)", value="Оформляет цитату из введенных данных;", inline=False)
         embed.add_field(name="!mem (число)", value="Выдает шаблон для мема;", inline=False)
         embed.add_field(name="!mem_h", value="Выдает список самых популярных шаблонов для мемов;", inline=False)
         embed.add_field(name="!we (город или населенный пункт)", value="""Присылает текущее состояние погоды
@@ -279,8 +295,20 @@ class Speedwagon(commands.Cog):
         embed.add_field(name="!rofl_h", value="Помощь по рофлам;", inline=False)
         embed.add_field(name="!rofl (число, обозначающее тип рофла)", value="""Присылает рофлянку введенной
              категории (!rofl_h);""", inline=False)
-        embed.add_field(name="!dem (ваш текст) + прикрепите картинку", value="Подписывает картинку;", inline=False)
-        embed.add_field(name="!shakal или !sh + прикрепите картинку", value="Шакалит картинку;", inline=False)
+        embed.add_field(name="!filter (вид эффекта) + ваша фотография", value="""Присылает обработанную фотографию
+         по фильтру, ввыбранному вами из списка (!filter_h).""", inline=False)
+        await ctx.send(embed=embed)
+
+    @commands.command(name='filter_h')
+    async def filter_h(self, ctx):
+        embed = discord.Embed(title='Фотообработчики бота:', colour=0xffff00)
+        embed.add_field(name="dem (текст1);(текст2)", value='Создаст демотиватор;', inline=False)
+        embed.add_field(name="b-w", value='Создаст черно-белую фотографию;', inline=False)
+        embed.add_field(name="quantize", value='Создаст отквантованную фотографию;', inline=False)
+        embed.add_field(name="blur", value="Создаст размытую фотографию;", inline=False)
+        embed.add_field(name="negative", value="Инвертирует цвета на фотографии;", inline=False)
+        embed.add_field(name="cit (текст);(автор)", value="Создает цитату;", inline=False)
+        embed.add_field(name="sh или shakal", value="Сильно повышает резкость изображения.", inline=False)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['pl'])
@@ -297,10 +325,19 @@ class Speedwagon(commands.Cog):
         else:
             vc = ctx.guild.voice_client
         ydl = YoutubeDL(YDL_OPTIONS)
-        if 'https://' in url:
-            info = ydl.extract_info(url, download=False)
-        else:
-            info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+        try:
+            ydl.cache.remove()
+            if 'https://' in url:
+                info = ydl.extract_info(url, download=False)
+            else:
+                info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+        except Exception as e:
+            embed = discord.Embed(title="Ошибка воспроизведения:",
+                                  description=e,
+                                  colour=0xff0000)
+            mes = await ctx.reply(embed=embed, mention_author=False)
+            await mes.add_reaction('❌')
+            return
         arg = info['formats'][0]['url']
         guild_id = ctx.message.guild.id
         if guild_id not in queues_n:
@@ -335,7 +372,8 @@ class Speedwagon(commands.Cog):
                 embed.add_field(name="Длительность: ",
                                 value=str(b['duration']) + ' c.')
                 queues_n[guild_id].append(b['title'] + ' --- ' + str(b['duration']) + ' c.')
-            await ctx.reply(embed=embed, mention_author=False)
+            mes = await ctx.reply(embed=embed, mention_author=False)
+            await mes.add_reaction('✅')
         else:
             b = info
             embed = discord.Embed(title="Сейчас играет:", url=b['webpage_url'],
@@ -367,7 +405,8 @@ class Speedwagon(commands.Cog):
             else:
                 queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
             check_queue(ctx, guild_id)
-            await ctx.reply(embed=embed, mention_author=False)
+            mes = await ctx.reply(embed=embed, mention_author=False)
+            await mes.add_reaction('✅')
 
     @commands.command()
     async def play(self, ctx):
@@ -383,10 +422,19 @@ class Speedwagon(commands.Cog):
         else:
             vc = ctx.guild.voice_client
         ydl = YoutubeDL(YDL_OPTIONS)
-        if 'https://' in url:
-            info = ydl.extract_info(url, download=False)
-        else:
-            info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+        try:
+            ydl.cache.remove()
+            if 'https://' in url:
+                info = ydl.extract_info(url, download=False)
+            else:
+                info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+        except Exception as e:
+            embed = discord.Embed(title="Ошибка воспроизведения:",
+                                  description=e,
+                                  colour=0xff0000)
+            mes = await ctx.reply(embed=embed, mention_author=False)
+            await mes.add_reaction('❌')
+            return
         arg = info['formats'][0]['url']
         guild_id = ctx.message.guild.id
         if guild_id not in queues_n:
@@ -399,6 +447,8 @@ class Speedwagon(commands.Cog):
             queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
         if vc.is_playing():
             vc.stop()
+        else:
+            check_queue(ctx, guild_id)
         embed = discord.Embed(title="Сейчас заиграет:", url=b['webpage_url'],
                               description=b['title'],
                               colour=0xff0000)
@@ -435,7 +485,8 @@ class Speedwagon(commands.Cog):
                 queues_n[guild_id] = [(b['title'] + ' --- ' + str(b['duration']) + ' c.')] + queues_n[guild_id]
             else:
                 queues_n[guild_id] = [(b['title'] + ' --- ' + str(b['duration']) + ' c.')]
-        await ctx.reply(embed=embed, mention_author=False)
+        mes = await ctx.reply(embed=embed, mention_author=False)
+        await mes.add_reaction('✅')
 
     @commands.command(aliases=['c', 'с'])
     async def clear(self, ctx):
@@ -444,7 +495,8 @@ class Speedwagon(commands.Cog):
         queues_n = {}
         embed = discord.Embed(title="Очередь была полностью очищена!",
                               colour=0xff0000)
-        await ctx.reply(embed=embed, mention_author=False)
+        mes = await ctx.reply(embed=embed, mention_author=False)
+        await mes.add_reaction('✅')
 
     @commands.command(aliases=['s', 'ы'])
     async def skip(self, ctx):
@@ -452,55 +504,47 @@ class Speedwagon(commands.Cog):
             global queues, now
             vc = ctx.guild.voice_client
             if vc.is_playing():
+                vc.stop()
                 if queues:
                     embed = discord.Embed(title="Песня была успешно пропущена!",
                                           description=now[ctx.message.guild.id],
                                           colour=0xff0000)
-                    vc.stop()
-                    await ctx.reply(embed=embed, mention_author=False)
-                else:
-                    vc.stop()
+                    mes = await ctx.reply(embed=embed, mention_author=False)
+                    await mes.add_reaction('✅')
         except IndexError:
             pass
 
     @commands.command(aliases=['q', 'й'])
     async def queue(self, ctx):
         global queues_n, queues, now
-        try:
+        id = ctx.message.guild.id
+        if id in queues and vc.is_playing():
             q = queues_n[ctx.message.guild.id]
             embed = discord.Embed(title='Текущая очередь из песен:', colour=0xff0000)
             embed.add_field(name='Играет прямо сейчас:', value=now[ctx.message.guild.id], inline=False)
             for i, e in enumerate(q):
                 embed.add_field(name=str(i + 1) + ' - ', value=e, inline=False)
-            await ctx.reply(embed=embed, mention_author=False)
-        except Exception:
+            mes = await ctx.reply(embed=embed, mention_author=False)
+            await mes.add_reaction('✅')
+        else:
             embed = discord.Embed(title='Показывать нечего', colour=0xff0000)
-            await ctx.reply(embed=embed, mention_author=False)
+            mes = await ctx.reply(embed=embed, mention_author=False)
+            await mes.add_reaction('✅')
 
     @commands.command(aliases=['l', 'д'])
     async def leave(self, ctx):
         if ctx.voice_client:
+            id = ctx.message.guild.id
             await ctx.voice_client.disconnect()
-            await ctx.reply('Ладно, я пошел. До связи!', mention_author=False)
+            mes = await ctx.reply('Ладно, я пошел. До связи', mention_author=False)
+            await mes.add_reaction('😭')
+            prev_n[id] = []
+            prev[id] = []
+            queues_n[id] = []
+            queues[id] = []
+            now[id] = []
         else:
             await ctx.reply('Да я и не подключен вроде', mention_author=False)
-
-    @commands.command(name='cit')
-    async def cit(self, ctx):
-        try:
-            img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
-            img.save('example.png')
-            if len(ctx.message.content.split('!cit ')[-1].split(';')) == 2:
-                a = Quote(ctx.message.content.split('!cit ')[-1].split(';')[0],
-                          ctx.message.content.split('!cit ')[-1].split(';')[-1])
-            else:
-                a = Quote(ctx.message.content.split('!cit ')[-1].split(';')[0], 'неизвестный мыслитель')
-            a.create('example.png', result_filename='bebra.png')
-            await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
-            os.remove('bebra.png')
-            os.remove('example.png')
-        except Exception:
-            await ctx.reply('Ну ты что-то неправильно сделал', mention_author=False)
 
     @commands.command(name='mem')
     async def mem(self, ctx):
@@ -574,7 +618,7 @@ class Speedwagon(commands.Cog):
                         11 - Афоризмы (+18);
                         12 - Цитаты (+18);
                         13 - Тосты (+18);
-                        14 - Статусы (+18);""", colour=0xff0000)
+                        14 - Статусы (+18).""", colour=0xff0000)
             await ctx.reply(embed=embed, mention_author=False)
         except Exception:
             await ctx.reply('Команда rofl_h не сработала(((', mention_author=False)
@@ -602,40 +646,7 @@ class Speedwagon(commands.Cog):
             itog = itog.replace('     ', '\r')
             await ctx.reply(itog, mention_author=False)
         except Exception:
-            await ctx.reply('категории смешнявок можно изучить, вызвав команду !rofl_h', mention_author=False)
-
-    @commands.command(name='dem')
-    async def dem(self, ctx):
-        try:
-            img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
-            img.save('example.png')
-            if ';' in ctx.message.content:
-                dem = Demotivator(ctx.message.content.split('!dem ')[-1].split(';')[0],
-                                  ctx.message.content.split('!dem ')[-1].split(';')[-1])
-            else:
-                dem = Demotivator(ctx.message.content.split('!dem ')[-1], '')
-            dem.create('example.png', result_filename='bebra.png')
-            await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
-            os.remove('example.png')
-            os.remove('bebra.png')
-        except Exception:
-            await ctx.reply('ну ты что-то неправильно сделал', mention_author=False)
-
-    @commands.command(name='shakal', aliases=['sh', 'ыр'])
-    async def shakal(self, ctx):
-        try:
-            img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
-            if img.size[0] > 2000 or img.size[-1] > 2000:
-                img = img.resize((int(img.size[0] * 0.5), int(img.size[-1] * 0.5)))
-            enhancer = ImageEnhance.Sharpness(img)
-            img = enhancer.enhance(600)
-            enhancer = ImageEnhance.Brightness(img)
-            img = enhancer.enhance(0.85)
-            img.save('example.png')
-            await ctx.reply(file=discord.File('example.png'), mention_author=False)
-            os.remove('example.png')
-        except ValueError:
-            await ctx.reply('тут не RGB, дурак. я это жрать не буду!!!!', mention_author=False)
+            await ctx.reply('Категории смешнявок можно изучить, вызвав команду !rofl_h', mention_author=False)
 
 
 if __name__ == '__main__':
