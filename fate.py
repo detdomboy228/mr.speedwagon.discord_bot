@@ -31,25 +31,25 @@ YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'False', 'simulate': 'T
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 queues = {}
 queues_n = {}
-sl_weather = {'clear': 'ясно',
-              'partly-cloudy': 'малооблачно',
-              'cloudy': 'облачно с прояснениями',
-              'overcast': 'пасмурно',
-              'drizzle': 'морось',
-              'light-rain': 'небольшой дождь',
-              'rain': 'дождь',
-              'moderate-rain': 'умеренно сильный дождь',
-              'heavy-rain': 'сильный дождь',
-              'continuous-heavy-rain': 'длительный сильный дождь',
-              'showers': 'ливень',
-              'wet-snow': 'дождь со снегом',
-              'light-snow': 'небольшой снег',
-              'snow': 'снег',
-              'snow-showers': 'снегопад',
-              'hail': 'град',
-              'thunderstorm': 'гроза',
-              'thunderstorm-with-rain': 'дождь с грозой',
-              'thunderstorm-with-hail': 'гроза с градом'}
+sl_weather = {'clear': ['ясно', f'https://angarsk38.ru/wp-content/uploads/2018/06/15.jpg'],
+              'partly-cloudy': ['малооблачно', f'https://region.center/source/VLADIMIR/2019/priroda/UUaXmnVzOl8.jpg'],
+              'cloudy': ['облачно с прояснениями', f'http://dvinatoday.ru/upload/iblock/f93/072001_1394511601.jpg'],
+              'overcast': ['пасмурно', f'https://get.wallhere.com/photo/landscape-monochrome-architecture-building-sky-rain-photography-clouds-house-lightning-storm-England-evening-town-atmosphere-summer-British-thunder-Olympus-cloud-stormy-tree-cloudy-weather-houses-roof-cloudsstormssunsetssunrises-olympusomd-facade-black-and-white-monochrome-photography-residential-area-meteorological-phenomenon-cumulus-phenomenon-883443.jpg'],
+              'drizzle': ['морось', f'https://vsegda-pomnim.com/uploads/posts/2022-02/1645905858_2-vsegda-pomnim-com-p-moros-foto-7.jpg'],
+              'light-rain': ['небольшой дождь', f'https://miro.medium.com/max/960/1*QbCmpwz1y-QHT4AzCZ9Fbg.jpeg'],
+              'rain': ['дождь', f'https://proza.ru/pics/2020/08/03/94.jpg'],
+              'moderate-rain': ['умеренно сильный дождь', f'https://zanmsk.ru/wp-content/uploads/2019/08/ba956e0470cdd6a2ab6c7fafffdb9786978dc9c9.jpg'],
+              'heavy-rain': ['сильный дождь', f'https://avatars.mds.yandex.net/get-zen_doc/4375924/pub_60aca366d001161964edeae2_60aca3a3e3047f5161c1680a/scale_1200'],
+              'continuous-heavy-rain': ['длительный сильный дождь', f'https://gazetaingush.ru/sites/default/files/news/20170623-v-ingushetii-ozhidayutsya-silnye-dozhdi-s-grozoy-i-gradom-mchs/dozhd_0.jpg'],
+              'showers': ['ливень', f'https://dela.ru/medianew/img/1-9326785.jpg'],
+              'wet-snow': ['дождь со снегом', f'https://veved.ru/uploads/posts/2020-04/1587557186_d0b2619858db4e9bb83f12fb74d9f34f.max-1200x800.jpg'],
+              'light-snow': ['небольшой снег', f'https://img5.goodfon.ru/original/960x854/b/e6/kot-ryzhii-zima-sneg-snegopad.jpg'],
+              'snow': ['снег', f'https://proprikol.ru/wp-content/uploads/2020/07/kartinki-idet-sneg-9.jpg'],
+              'snow-showers': ['снегопад', f'https://ulpravda.ru/pictures/news/big/100703_big.jpg'],
+              'hail': ['град', f'https://misanec.ru/wp-content/uploads/2018/07/grad.jpg'],
+              'thunderstorm': ['гроза', f'https://proprikol.ru/wp-content/uploads/2019/12/kartinki-pro-molniyu-i-grozu-26.jpg'],
+              'thunderstorm-with-rain': ['дождь с грозой', f'https://static.mk.ru/upload/entities/2021/06/14/07/articles/facebookPicture/44/56/2a/d8/d41aa129d36ecf5f701a7f16e12a510e.jpg'],
+              'thunderstorm-with-hail': ['гроза с градом', f'https://gorzavod.ru/wp-content/uploads/2019/07/llcUwlh_28k.jpg']}
 now = {}
 prev = {}
 prev_n = {}
@@ -67,8 +67,8 @@ def check_queue(ctx, id):
             else:
                 prev_n[id] = now[id]
                 prev[id] = source
-            vc.play(source, after=lambda x=0: check_queue(ctx, ctx.message.guild.id))
             now[id] = queues_n[id][0]
+            vc.play(source, after=lambda x=0: check_queue(ctx, ctx.message.guild.id))
             del queues_n[id][0]
             del queues[id][0]
         except IndexError:
@@ -127,12 +127,16 @@ async def on_message(message):
         db_sess.commit()
         for userr in db_sess.query(User).all():
             userr.id -= 1
+        db_sess.commit()
         user = User()
         user.name = message.author.name + message.author.discriminator
         user.message = message.content
-        await message.channel.send(random.choice(db_sess.query(User).filter(
-            User.message.in_(message.content.split()) | User.message.like(
-                '%' + message.content + '%')).all()).message)
+        mes_pul = db_sess.query(User).filter(
+            User.message.in_(message.content.split()) | User.message.like('%' + message.content + '%')).all()
+        if mes_pul:
+            a = random.choice(mes_pul).message
+            if a != message.content:
+                await message.channel.send(a)
         db_sess.add(user)
         db_sess.commit()
     # конец СГЛЫПЫ
@@ -164,9 +168,15 @@ class Speedwagon(commands.Cog):
         try:
             sss = easy_convert(prev_n[id])[-1]
         except Exception as e:
-            await ctx.reply(discord.Embed(title='Ошибка воспроизведения:', colour=0xff0000,
+            await ctx.reply(discord.Embed(title='Ошибка воспроизведения:',
+                                          colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                        random.randrange(0, 255),
+                                                                        random.randrange(0, 255)),
                                           description=str(e)), mention_author=False)
-        embed = discord.Embed(title='Отмотано к:', colour=0xff0000, url=sss['webpage_url'],
+        embed = discord.Embed(title='Отмотано к:', colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                 random.randrange(0, 255),
+                                                                                 random.randrange(0, 255)),
+                              url=sss['webpage_url'],
                               description=sss['title'])
         embed.set_author(name=sss['uploader'])
         embed.set_thumbnail(url=sss['thumbnails'][0]['url'])
@@ -200,6 +210,7 @@ class Speedwagon(commands.Cog):
         prev_n[id] = now[id]
         print(prev_n[id])
         vc.stop()
+        check_queue(ctx, id)
         mes = await ctx.reply(embed=embed, mention_author=False)
         await mes.add_reaction('✅')
 
@@ -214,11 +225,12 @@ class Speedwagon(commands.Cog):
                     "response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["Point"]["pos"].split()
                 res = yandex_weather_api.get(requests, '5a57c893-985b-482d-a875-1f09c7151960', lat=y, lon=x)
                 embed = discord.Embed(title='Погода',
-                                      description=f'Температура: {str(res["fact"]["temp"])}°С\nОщущается как: {str(res["fact"]["feels_like"])}°С\nПогодные условия: {sl_weather[str(res["fact"]["condition"])]}\nВлажность: {str(res["fact"]["humidity"]) + "%"}\nСкорость ветра: {str(res["fact"]["wind_speed"]) + " М/С"}',
+                                      description=f'Температура: {str(res["fact"]["temp"])}°С\nОщущается как: {str(res["fact"]["feels_like"])}°С\nПогодные условия: {sl_weather[str(res["fact"]["condition"])][0]}\nВлажность: {str(res["fact"]["humidity"]) + "%"}\nСкорость ветра: {str(res["fact"]["wind_speed"]) + " М/С"}',
                                       colour=0x9999FF)
                 embed.set_author(name='Яндекс.Погода',
                                  icon_url=f'https://yastatic.net/s3/home-static/_/37/37a02b5dc7a51abac55d8a5b6c865f0e.png')
-                await ctx.send(embed=embed)
+                embed.set_image(url=sl_weather[str(res["fact"]["condition"])][-1])
+                await ctx.reply(embed=embed, mention_author=False)
             else:
                 await ctx.reply('Ну ты город-то введи', mention_author=False)
         except Exception:
@@ -279,7 +291,9 @@ class Speedwagon(commands.Cog):
 
     @commands.command(name='h')
     async def help(self, ctx):
-        embed = discord.Embed(title='Все команды бота:', colour=0xffff00)
+        embed = discord.Embed(title='Все команды бота:', colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
         embed.add_field(name="!hello", value='Скажет "Привет";', inline=False)
         embed.add_field(name="!p или !pl (желаемая песня)", value="""Включит в вашем голосовом канале
              желаемую музыку;""", inline=False)
@@ -289,7 +303,7 @@ class Speedwagon(commands.Cog):
         embed.add_field(name="!skip или !s", value="Пропускает музыку, которая идет сейчас;", inline=False)
         embed.add_field(name="!leave или !l", value="Покидает голосовой канал;", inline=False)
         embed.add_field(name="!mem (число)", value="Выдает шаблон для мема;", inline=False)
-        embed.add_field(name="!mem_h", value="Выдает список самых популярных шаблонов для мемов;", inline=False)
+        embed.add_field(name="!mem_h (число страницы)", value="Выдает список самых популярных шаблонов для мемов;", inline=False)
         embed.add_field(name="!we (город или населенный пункт)", value="""Присылает текущее состояние погоды
              в вашем городе или населенном пункте;""", inline=False)
         embed.add_field(name="!rofl_h", value="Помощь по рофлам;", inline=False)
@@ -301,7 +315,9 @@ class Speedwagon(commands.Cog):
 
     @commands.command(name='filter_h')
     async def filter_h(self, ctx):
-        embed = discord.Embed(title='Фотообработчики бота:', colour=0xffff00)
+        embed = discord.Embed(title='Фотообработчики бота:', colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
         embed.add_field(name="dem (текст1);(текст2)", value='Создаст демотиватор;', inline=False)
         embed.add_field(name="b-w", value='Создаст черно-белую фотографию;', inline=False)
         embed.add_field(name="quantize", value='Создаст отквантованную фотографию;', inline=False)
@@ -331,10 +347,21 @@ class Speedwagon(commands.Cog):
                 info = ydl.extract_info(url, download=False)
             else:
                 info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+            if not info:
+                embed = discord.Embed(title="Ошибка воспроизведения:",
+                                      description='Отказано в доступе к сервису;\nПопробуйте еще раз!',
+                                      colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
+                mes = await ctx.reply(embed=embed, mention_author=False)
+                await mes.add_reaction('❌')
+                return
         except Exception as e:
             embed = discord.Embed(title="Ошибка воспроизведения:",
                                   description=e,
-                                  colour=0xff0000)
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('❌')
             return
@@ -350,7 +377,9 @@ class Speedwagon(commands.Cog):
                 queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
             embed = discord.Embed(title="Добавлено в очередь:", url=b['webpage_url'],
                                   description=b['title'],
-                                  colour=0xff0000)
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
             embed.set_author(name=b['uploader'])
             embed.set_thumbnail(url=b['thumbnails'][0]['url'])
             if int(b['duration']) > 60:
@@ -378,7 +407,9 @@ class Speedwagon(commands.Cog):
             b = info
             embed = discord.Embed(title="Сейчас играет:", url=b['webpage_url'],
                                   description=b['title'],
-                                  colour=0xff0000)
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
             embed.set_author(name=b['uploader'])
             embed.set_thumbnail(url=b['thumbnails'][0]['url'])
             if int(b['duration']) > 60:
@@ -428,10 +459,21 @@ class Speedwagon(commands.Cog):
                 info = ydl.extract_info(url, download=False)
             else:
                 info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+            if not info:
+                embed = discord.Embed(title="Ошибка воспроизведения:",
+                                      description='Отказано в доступе к сервису;\nПопробуйте еще раз!',
+                                      colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
+                mes = await ctx.reply(embed=embed, mention_author=False)
+                await mes.add_reaction('❌')
+                return
         except Exception as e:
             embed = discord.Embed(title="Ошибка воспроизведения:",
                                   description=e,
-                                  colour=0xff0000)
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('❌')
             return
@@ -451,7 +493,9 @@ class Speedwagon(commands.Cog):
             check_queue(ctx, guild_id)
         embed = discord.Embed(title="Сейчас заиграет:", url=b['webpage_url'],
                               description=b['title'],
-                              colour=0xff0000)
+                              colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
         embed.set_author(name=b['uploader'])
         embed.set_thumbnail(url=b['thumbnails'][0]['url'])
         if int(b['duration']) > 60:
@@ -494,7 +538,9 @@ class Speedwagon(commands.Cog):
         queues = {}
         queues_n = {}
         embed = discord.Embed(title="Очередь была полностью очищена!",
-                              colour=0xff0000)
+                              colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
         mes = await ctx.reply(embed=embed, mention_author=False)
         await mes.add_reaction('✅')
 
@@ -508,7 +554,9 @@ class Speedwagon(commands.Cog):
                 if queues:
                     embed = discord.Embed(title="Песня была успешно пропущена!",
                                           description=now[ctx.message.guild.id],
-                                          colour=0xff0000)
+                                          colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
                     mes = await ctx.reply(embed=embed, mention_author=False)
                     await mes.add_reaction('✅')
         except IndexError:
@@ -520,14 +568,18 @@ class Speedwagon(commands.Cog):
         id = ctx.message.guild.id
         if id in queues and vc.is_playing():
             q = queues_n[ctx.message.guild.id]
-            embed = discord.Embed(title='Текущая очередь из песен:', colour=0xff0000)
+            embed = discord.Embed(title='Текущая очередь из песен:', colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
             embed.add_field(name='Играет прямо сейчас:', value=now[ctx.message.guild.id], inline=False)
             for i, e in enumerate(q):
                 embed.add_field(name=str(i + 1) + ' - ', value=e, inline=False)
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('✅')
         else:
-            embed = discord.Embed(title='Показывать нечего', colour=0xff0000)
+            embed = discord.Embed(title='Показывать нечего', colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('✅')
 
@@ -583,7 +635,9 @@ class Speedwagon(commands.Cog):
             res = (requests.get('https://api.imgflip.com/get_memes')).json()
             embed = discord.Embed(title='Текущий "топ" мемов:',
                                   description=':white_check_mark: - подходит для создания мема\n :x: - не подходит',
-                                  colour=0xff0000)
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
             c = 1
             for i, e in enumerate(res['data']['memes']):
                 if (i + 1 >= n * 10) and (i + 1 <= n * 10 + 10):
@@ -618,7 +672,9 @@ class Speedwagon(commands.Cog):
                         11 - Афоризмы (+18);
                         12 - Цитаты (+18);
                         13 - Тосты (+18);
-                        14 - Статусы (+18).""", colour=0xff0000)
+                        14 - Статусы (+18).""", colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
             await ctx.reply(embed=embed, mention_author=False)
         except Exception:
             await ctx.reply('Команда rofl_h не сработала(((', mention_author=False)
