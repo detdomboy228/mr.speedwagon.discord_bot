@@ -280,14 +280,14 @@ class Speedwagon(commands.Cog):
                 img = enhancer.enhance(600)
                 enhancer = ImageEnhance.Brightness(img)
                 img = enhancer.enhance(0.85)
-                img.save('example.png')
-                await ctx.reply(file=discord.File('example.png'), mention_author=False)
+                img.save('bebra.png')
+                await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
             os.remove('bebra.png')
             os.remove('example.png')
         except ValueError:
             await ctx.reply('Здесь не RGB! Прошу поменять формат', mention_author=False)
         except Exception:
-            await ctx.reply('Ну ты что-то неправильно сделал', mention_author=False)
+            await ctx.reply('Ну ты что-то неправильно сделал(((', mention_author=False)
 
     @commands.command(name='h')
     async def help(self, ctx):
