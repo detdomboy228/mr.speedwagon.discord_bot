@@ -82,7 +82,7 @@ def easy_convert(name):
     name = name.split(' --- ')[0]
     info = ydl.extract_info(f"ytsearch:{name}", download=False)['entries'][0]
     arg = info['formats'][0]
-    a = (FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg['url'], **FFMPEG_OPTIONS))
+    a = (FFmpegPCMAudio(executable="ffmpeg.exe", source=arg['url'], **FFMPEG_OPTIONS))
     return a, info
 
 
