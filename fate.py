@@ -49,7 +49,8 @@ sl_weather = {'clear': ['ясно', f'https://angarsk38.ru/wp-content/uploads/20
               'hail': ['град', f'https://misanec.ru/wp-content/uploads/2018/07/grad.jpg'],
               'thunderstorm': ['гроза', f'https://proprikol.ru/wp-content/uploads/2019/12/kartinki-pro-molniyu-i-grozu-26.jpg'],
               'thunderstorm-with-rain': ['дождь с грозой', f'https://static.mk.ru/upload/entities/2021/06/14/07/articles/facebookPicture/44/56/2a/d8/d41aa129d36ecf5f701a7f16e12a510e.jpg'],
-              'thunderstorm-with-hail': ['гроза с градом', f'https://gorzavod.ru/wp-content/uploads/2019/07/llcUwlh_28k.jpg']}
+              'thunderstorm-with-hail': ['гроза с градом', f'https://gorzavod.ru/wp-content/uploads/2019/07/llcUwlh_28k.jpg']
+              'cloudy-and-rain': ['облачно с дождем', f'https://avatars.mds.yandex.net/i?id=261b500f7f8885682b96e12db1a3c6b8_l-5315630-images-thumbs&n=13']}
 now = {}
 prev = {}
 prev_n = {}
