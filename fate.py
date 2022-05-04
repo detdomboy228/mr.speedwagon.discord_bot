@@ -373,9 +373,9 @@ class Speedwagon(commands.Cog):
         if vc.is_playing():
             b = info
             if guild_id in queues:
-                queues[guild_id].append((FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS)))
+                queues[guild_id].append((FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS)))
             else:
-                queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
+                queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
             embed = discord.Embed(title="Добавлено в очередь:", url=b['webpage_url'],
                                   description=b['title'],
                                   colour=discord.Color.from_rgb(random.randrange(0, 255),
@@ -433,9 +433,9 @@ class Speedwagon(commands.Cog):
                                 value=str(b['duration']) + ' c.')
                 queues_n[guild_id].append(b['title'] + ' --- ' + str(b['duration']) + ' c.')
             if guild_id in queues:
-                queues[guild_id].append((FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS)))
+                queues[guild_id].append((FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS)))
             else:
-                queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
+                queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
             check_queue(ctx, guild_id)
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('✅')
@@ -484,10 +484,10 @@ class Speedwagon(commands.Cog):
             queues_n[guild_id] = []
         b = info
         if guild_id in queues:
-            queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))] + \
+            queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))] + \
                                queues[guild_id]
         else:
-            queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg\\ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
+            queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
         if vc.is_playing():
             vc.stop()
         else:
