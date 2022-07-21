@@ -57,6 +57,7 @@ WIKI_REQUEST = 'http://ru.wikipedia.org/w/api.php?action=query&prop=pageimages&f
 now = {}
 prev = {}
 prev_n = {}
+ffmpeg, ffprobe = run.get_or_fetch_platform_executables_else_raise()
 
 
 def check_queue(ctx, id):
@@ -86,9 +87,23 @@ def easy_convert(name):
     name = name.split(' --- ')[0]
     info = ydl.extract_info(f"ytsearch:{name}", download=False)['entries'][0]
     arg = info['formats'][0]
-    a = (FFmpegPCMAudio(executable="ffmpeg.exe", source=arg['url'], **FFMPEG_OPTIONS))
+    a = (FFmpegPCMAudio(executable=ffmpeg, source=arg['url'], **FFMPEG_OPTIONS))
+    os.system('youtube-dl --rm-cache-dir')
     return a, info
 
+def get_wiki_image(search_term):
+    try:
+        result = wi.search(search_term, results = 1)
+        wi.set_lang('ru')
+        wkpage = wi.WikipediaPage(title = result[0])
+        title = wkpage.title
+        response  = requests.get(WIKI_REQUEST+title)
+        json_data = json.loads(response.text)
+        img_link = list(json_data['query']['pages'].values())[0]['original']['source']
+        print(img_link)
+        return img_link
+    except:
+       return 0
 
 @bot.event
 async def on_ready():
@@ -101,11 +116,11 @@ async def on_message(message):
     global cur, db
     if message.author == bot.user:
         return
-    elif ('пошел нахуй' in message.content.lower() or 'пошёл нахуй' in message.content.lower()) and \
+    elif ('пошел отсюда' in message.content.lower() or 'пошёл отсюда' in message.content.lower()) and \
             'бот' in message.content.lower():
         await message.channel.send('слушаюсь, мой господин')
-    elif 'джотаро худший джоджо' in message.content.lower():
-        await message.channel.send('полностью согласен!!!\nсамый крутой Джозеф')
+    elif 'джозеф худший джоджо' in message.content.lower():
+        await message.channel.send('полностью согласен!!!\nсамый крутой Джотаро')
     #################################
     elif 'кот' in message.content.lower() or 'кош' in message.content.lower():
         r = requests.get('https://api.thecatapi.com/v1/images/search').json()[0]['url']
@@ -476,12 +491,12 @@ class Speedwagon(commands.Cog):
         guild_id = ctx.message.guild.id
         if guild_id not in queues_n:
             queues_n[guild_id] = []
-        if vc.is_playing():
+        if vc.is_paused() or vc.is_playing():
             b = info
             if guild_id in queues:
-                queues[guild_id].append((FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS)))
+                queues[guild_id].append((FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS)))
             else:
-                queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
+                queues[guild_id] = [(FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS))]
             embed = discord.Embed(title="Добавлено в очередь:", url=b['webpage_url'],
                                   description=b['title'],
                                   colour=discord.Color.from_rgb(random.randrange(0, 255),
@@ -539,10 +554,12 @@ class Speedwagon(commands.Cog):
                                 value=str(b['duration']) + ' c.')
                 queues_n[guild_id].append(b['title'] + ' --- ' + str(b['duration']) + ' c.')
             if guild_id in queues:
-                queues[guild_id].append((FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS)))
+                queues[guild_id].append((FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS)))
             else:
-                queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
+                queues[guild_id] = [(FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS))]
             check_queue(ctx, guild_id)
+            embed.add_field(name="Если уже долго не играет: ",
+                                value="*Это может быть проблема с сервером, попробуйте повторить запрос*", inline=False)
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('✅')
 
@@ -566,7 +583,7 @@ class Speedwagon(commands.Cog):
                 info = ydl.extract_info(url, download=False)
             else:
                 info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
-            if not info:
+            if info is None:
                 embed = discord.Embed(title="Ошибка воспроизведения:",
                                       description='Отказано в доступе к сервису;\nПопробуйте еще раз!',
                                       colour=discord.Color.from_rgb(random.randrange(0, 255),
@@ -590,14 +607,10 @@ class Speedwagon(commands.Cog):
             queues_n[guild_id] = []
         b = info
         if guild_id in queues:
-            queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))] + \
+            queues[guild_id] = [(FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS))] + \
                                queues[guild_id]
         else:
-            queues[guild_id] = [(FFmpegPCMAudio(executable="ffmpeg.exe", source=arg, **FFMPEG_OPTIONS))]
-        if vc.is_playing():
-            vc.stop()
-        else:
-            check_queue(ctx, guild_id)
+            queues[guild_id] = [(FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS))]
         embed = discord.Embed(title="Сейчас заиграет:", url=b['webpage_url'],
                               description=b['title'],
                               colour=discord.Color.from_rgb(random.randrange(0, 255),
@@ -636,6 +649,10 @@ class Speedwagon(commands.Cog):
                 queues_n[guild_id] = [(b['title'] + ' --- ' + str(b['duration']) + ' c.')] + queues_n[guild_id]
             else:
                 queues_n[guild_id] = [(b['title'] + ' --- ' + str(b['duration']) + ' c.')]
+        if vc.is_playing():
+            vc.stop()
+        else:
+            check_queue(ctx, guild_id)
         mes = await ctx.reply(embed=embed, mention_author=False)
         await mes.add_reaction('✅')
 
