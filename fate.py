@@ -1,5 +1,7 @@
 from data import db_session
 from data.users import User
+from static_ffmpeg import run
+import wikipedia as wi
 import discord
 import pprint
 from discord.ext import commands
@@ -24,7 +26,7 @@ logger.setLevel(logging.WARNING)
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix='-')
 YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'False', 'simulate': 'True',
                'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio',
                'logger': logger}
@@ -51,6 +53,7 @@ sl_weather = {'clear': ['ясно', f'https://angarsk38.ru/wp-content/uploads/20
               'thunderstorm-with-rain': ['дождь с грозой', f'https://static.mk.ru/upload/entities/2021/06/14/07/articles/facebookPicture/44/56/2a/d8/d41aa129d36ecf5f701a7f16e12a510e.jpg'],
               'thunderstorm-with-hail': ['гроза с градом', f'https://gorzavod.ru/wp-content/uploads/2019/07/llcUwlh_28k.jpg'],
               'cloudy-and-rain': ['облачно с дождем', f'https://avatars.mds.yandex.net/i?id=261b500f7f8885682b96e12db1a3c6b8_l-5315630-images-thumbs&n=13']}
+WIKI_REQUEST = 'http://ru.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles='
 now = {}
 prev = {}
 prev_n = {}
@@ -98,11 +101,11 @@ async def on_message(message):
     global cur, db
     if message.author == bot.user:
         return
-    elif ('пошел отсюда' in message.content.lower() or 'пошёл отсюда' in message.content.lower()) and \
+    elif ('пошел нахуй' in message.content.lower() or 'пошёл нахуй' in message.content.lower()) and \
             'бот' in message.content.lower():
         await message.channel.send('слушаюсь, мой господин')
-    elif 'джозеф худший джоджо' in message.content.lower():
-        await message.channel.send('полностью согласен!!!\nсамый крутой Джотаро')
+    elif 'джотаро худший джоджо' in message.content.lower():
+        await message.channel.send('полностью согласен!!!\nсамый крутой Джозеф')
     #################################
     elif 'кот' in message.content.lower() or 'кош' in message.content.lower():
         r = requests.get('https://api.thecatapi.com/v1/images/search').json()[0]['url']
@@ -160,6 +163,75 @@ class Speedwagon(commands.Cog):
     async def hello(self, ctx):
         author = ctx.message.author
         await ctx.reply(f'Привет, {author.mention}!', mention_author=False)
+
+    @commands.command(name='wiki')
+    async def wiki(self, ctx):
+        try:
+            wi.set_lang('ru')
+            embed = discord.Embed(title='Вот, что удалось найти:',
+                              description=wi.summary(ctx.message.content.split('-wiki ')),
+                              colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                        random.randrange(0, 255),
+                                                                        random.randrange(0, 255)))
+            embed.set_image(url=get_wiki_image(ctx.message.content.split('-wiki ')))
+            embed.set_author(name="Wikipedia",
+                             icon_url="https://festivalnauki.ru/upload/iblock/10c/10c4220955df61cfc0719fcddc1c52f4.jpg")
+            await ctx.reply(embed=embed, mention_author=False)
+        except Exception:
+          await ctx.reply("Похоже, где-то была допущена ошибка, или такого вовсе не существует(")
+
+    @commands.command(name='now')
+    async def now(self, ctx):
+      try:
+          sss = easy_convert(now[ctx.message.guild.id])[-1]
+          embed = discord.Embed(title='Играет прямо сейчас:', description=now[ctx.message.guild.id].split(' ---')[0],
+                                colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                          random.randrange(0, 255),
+                                                                          random.randrange(0, 255)),
+                                url=sss['webpage_url'])
+          embed.set_author(name=sss['uploader'])
+          embed.set_thumbnail(url=sss['thumbnails'][-1]['url'])
+          embed.add_field(name='Длительность:', value=now[ctx.message.guild.id].split(' --- ')[-1], inline=False)
+          await ctx.reply(embed=embed, mention_author=False)
+      except Exception:
+          await ctx.reply('Видимо, сейчас ничего не играет(', mention_author=False)
+          return
+
+    @commands.command(name='pause')
+    async def pause(self, ctx):
+        try:
+            try:
+                vc = ctx.guild.voice_client
+            except Exception:
+                ctx.reply('Ну сам-то зайди тоже', mention_author=False)
+            vc.pause()
+            mes = await ctx.reply(embed=discord.Embed(title='Пауза!',
+                                                      colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                        random.randrange(0, 255),
+                                                                        random.randrange(0, 255))),
+                                  mention_author=False)
+            await mes.add_reaction('✅')
+        except Exception:
+            await ctx.reply('ALARM!ALARM! ВОЗНИКЛА ОШИБКА! ALARM!ALARM!', mention_author=False)
+            return
+
+    @commands.command(name='resume')
+    async def resume(self, ctx):
+        try:
+            try:
+                vc = ctx.guild.voice_client
+            except Exception:
+                ctx.reply('Ну сам-то зайди тоже', mention_author=False)
+            vc.resume()
+            mes = await ctx.reply(embed=discord.Embed(title='Воспроизведение продолжается!',
+                                                      colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                    random.randrange(0, 255),
+                                                                                    random.randrange(0, 255))),
+                                  mention_author=False)
+            await mes.add_reaction('✅')
+        except Exception:
+            await ctx.reply('ALARM!ALARM! ВОЗНИКЛА ОШИБКА! ALARM!ALARM!', mention_author=False)
+            return
 
     @commands.command(name='back', aliases=['b'])
     async def back(self, ctx):
@@ -223,8 +295,8 @@ class Speedwagon(commands.Cog):
     async def we(self, ctx):
         global sl_weather
         try:
-            if ctx.message.content.split('!we')[-1] and ctx.message.content.split('!we')[-1] != ' ':
-                n = ctx.message.content.split('!we ')[-1].strip()
+            if ctx.message.content.split('-we')[-1] and ctx.message.content.split('-we')[-1] != ' ':
+                n = ctx.message.content.split('-we ')[-1].strip()
                 x, y = requests.get(
                     f"http://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode={n}&format=json").json()[
                     "response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["Point"]["pos"].split()
@@ -239,21 +311,48 @@ class Speedwagon(commands.Cog):
             else:
                 await ctx.reply('Ну ты город-то введи', mention_author=False)
         except Exception:
-            await ctx.reply('Команда !we не сработала(((', mention_author=False)
+            await ctx.reply('Команда -we не сработала(((', mention_author=False)
 
-    @commands.command(name='filt', aliases=['filter'])
+    @commands.command(name='filt', aliases=['filter', 'f', 'ашдеук', 'а'])
     async def filt(self, ctx):
         try:
             img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
             img.save('example.png')
             if ctx.message.content.split()[1] == 'dem':
                 if ';' in ctx.message.content:
-                    dem = Demotivator(ctx.message.content.split('!filter dem')[-1].split(';')[0],
-                                      ctx.message.content.split('!filter dem')[-1].split(';')[-1])
+                    dem = Demotivator(ctx.message.content.split('-filter dem')[-1].split(';')[0],
+                                      ctx.message.content.split('-filter dem')[-1].split(';')[-1])
                 else:
-                    dem = Demotivator(ctx.message.content.split('!filter dem')[-1], '')
-                dem.create('example.png', result_filename='bebra.png')
+                    dem = Demotivator(ctx.message.content.split('-filter dem')[-1], '')
+                dem.create("example.png", result_filename='bebra.png')
                 await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
+            elif ctx.message.content.split()[1] == 'ascii':
+                width = int(ctx.message.content.split()[2])
+                height_scale = 0.6
+                org_width, orig_height = img.size
+                aspect_ratio = orig_height / org_width
+                new_height = aspect_ratio * width * height_scale
+                img = img.resize((width, int(new_height)))
+                img = img.convert('RGBA')
+                img = ImageEnhance.Sharpness(img).enhance(2.0)
+                pixels = img.getdata()
+
+                def mapto(r, g, b, alpha):
+                    if alpha == 0.:
+                        return ' '
+                    chars = ["B", "S", "#", "&", "@", "$", "%", "*", "!", ".", " "]
+                    chars.reverse()
+                    pixel = (r * 19595 + g * 38470 + b * 7471 + 0x8000) >> 16
+                    return chars[pixel // 25]
+
+                new_pixels = [mapto(r, g, b, alpha) for r, g, b, alpha in pixels]
+                new_pixels_count = len(new_pixels)
+                ascii_image = [''.join(new_pixels[index:index + width]) for index in range(0, new_pixels_count, width)]
+                ascii_image = "\n".join(ascii_image)
+                with open("bebra.txt", "w") as file:
+                    file.write(ascii_image)
+                await ctx.reply(file=discord.File("bebra.txt"), mention_author=False)
+                os.remove('bebra.txt')
             elif ctx.message.content.split()[1] == 'b-w':
                 img = img.convert('L')
                 img.save('bebra.png')
@@ -271,12 +370,12 @@ class Speedwagon(commands.Cog):
                 img.save('bebra.png')
                 await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
             elif ctx.message.content.split()[1] == 'cit':
-                if len(ctx.message.content.split('!filter cit ')[-1].split(';')) == 2:
-                    a = Quote(ctx.message.content.split('!filter cit ')[-1].split(';')[0],
-                              ctx.message.content.split('!filter cit ')[-1].split(';')[-1])
+                if len(ctx.message.content.split('-filter cit ')[-1].split(';')) == 2:
+                    a = Quote(ctx.message.content.split('-filter cit ')[-1].split(';')[0],
+                              ctx.message.content.split('-filter cit ')[-1].split(';')[-1])
                 else:
-                    a = Quote(ctx.message.content.split('!filter cit ')[-1].split(';')[0], 'неизвестный мыслитель')
-                a.create('example.png', result_filename='bebra.png')
+                    a = Quote(ctx.message.content.split('-filter cit ')[-1].split(';')[0], 'неизвестный мыслитель')
+                a.create("example.png", result_filename='bebra.png')
                 await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
             elif ctx.message.content.split()[1] == 'sh' or ctx.message.content.split()[1] == 'shakal':
                 if img.size[0] > 2000 or img.size[-1] > 2000:
@@ -287,35 +386,37 @@ class Speedwagon(commands.Cog):
                 img = enhancer.enhance(0.85)
                 img.save('bebra.png')
                 await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
-            os.remove('bebra.png')
-            os.remove('example.png')
+            try:
+                os.remove('bebra.png')
+                os.remove('example.png')
+            except Exception:
+                pass
         except ValueError:
             await ctx.reply('Здесь не RGB! Прошу поменять формат', mention_author=False)
-        except Exception:
-            await ctx.reply('Ну ты что-то неправильно сделал(((', mention_author=False)
 
     @commands.command(name='h')
     async def help(self, ctx):
         embed = discord.Embed(title='Все команды бота:', colour=discord.Color.from_rgb(random.randrange(0, 255),
                                                                                        random.randrange(0, 255),
                                                                                        random.randrange(0, 255)))
-        embed.add_field(name="!hello", value='Скажет "Привет";', inline=False)
-        embed.add_field(name="!p или !pl (желаемая песня)", value="""Включит в вашем голосовом канале
+        embed.add_field(name="-hello", value='Скажет "Привет";', inline=False)
+        embed.add_field(name="-p или -pl (желаемая песня)", value="""Включит в вашем голосовом канале
              желаемую музыку;""", inline=False)
-        embed.add_field(name="!play (желаемая песня)", value="""Включит в вашем голосовом канале
+        embed.add_field(name="-play (желаемая песня)", value="""Включит в вашем голосовом канале
                      желаемую музыку, не обращая внимания на очередь;""", inline=False)
-        embed.add_field(name="!clear или !c", value="Очищает очередь из музыки;", inline=False)
-        embed.add_field(name="!skip или !s", value="Пропускает музыку, которая идет сейчас;", inline=False)
-        embed.add_field(name="!leave или !l", value="Покидает голосовой канал;", inline=False)
-        embed.add_field(name="!mem (число)", value="Выдает шаблон для мема;", inline=False)
-        embed.add_field(name="!mem_h (число страницы)", value="Выдает список самых популярных шаблонов для мемов;", inline=False)
-        embed.add_field(name="!we (город или населенный пункт)", value="""Присылает текущее состояние погоды
+        embed.add_field(name="-clear или -c", value="Очищает очередь из музыки;", inline=False)
+        embed.add_field(name="-skip или -s", value="Пропускает музыку, которая идет сейчас;", inline=False)
+        embed.add_field(name="-leave или -l", value="Покидает голосовой канал;", inline=False)
+        embed.add_field(name="-mem (число)", value="Выдает шаблон для мема;", inline=False)
+        embed.add_field(name="-mem_h (число страницы)", value="Выдает список самых популярных шаблонов для мемов;", inline=False)
+        embed.add_field(name="-wiki (ваш запрос)", value="Выдает краткую информацию о том, что вы ищете, из Википедии;", inline=False)
+        embed.add_field(name="-we (город или населенный пункт)", value="""Присылает текущее состояние погоды
              в вашем городе или населенном пункте;""", inline=False)
-        embed.add_field(name="!rofl_h", value="Помощь по рофлам;", inline=False)
-        embed.add_field(name="!rofl (число, обозначающее тип рофла)", value="""Присылает рофлянку введенной
-             категории (!rofl_h);""", inline=False)
-        embed.add_field(name="!filter (вид эффекта) + ваша фотография", value="""Присылает обработанную фотографию
-         по фильтру, ввыбранному вами из списка (!filter_h).""", inline=False)
+        embed.add_field(name="-rofl_h", value="Помощь по рофлам;", inline=False)
+        embed.add_field(name="-rofl (число, обозначающее тип рофла)", value="""Присылает рофлянку введенной
+             категории (-rofl_h);""", inline=False)
+        embed.add_field(name="-filter (вид эффекта) + ваша фотография", value="""Присылает обработанную фотографию
+         по фильтру, ввыбранному вами из списка (-filter_h).""", inline=False)
         await ctx.send(embed=embed)
 
     @commands.command(name='filter_h')
@@ -329,7 +430,8 @@ class Speedwagon(commands.Cog):
         embed.add_field(name="blur", value="Создаст размытую фотографию;", inline=False)
         embed.add_field(name="negative", value="Инвертирует цвета на фотографии;", inline=False)
         embed.add_field(name="cit (текст);(автор)", value="Создает цитату;", inline=False)
-        embed.add_field(name="sh или shakal", value="Сильно повышает резкость изображения.", inline=False)
+        embed.add_field(name="sh или shakal", value="Сильно повышает резкость изображения;", inline=False)
+        embed.add_field(name="ascii (желаемая ширина изображения в символах)", value="Конвертирует вашу фотографию в текстовый формат по символам таблицы ASCII.", inline=False)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['pl'])
@@ -540,6 +642,10 @@ class Speedwagon(commands.Cog):
     @commands.command(aliases=['c', 'с'])
     async def clear(self, ctx):
         global queues, queues_n
+        connected = ctx.author.voice
+        if not connected:
+            await ctx.reply("Ну сам-то зайди тоже", mention_author=False)
+            return
         queues = {}
         queues_n = {}
         embed = discord.Embed(title="Очередь была полностью очищена!",
@@ -553,8 +659,23 @@ class Speedwagon(commands.Cog):
     async def skip(self, ctx):
         try:
             global queues, now
+            connected = ctx.author.voice
+            if not connected:
+                await ctx.reply("Ну сам-то зайди тоже", mention_author=False)
+                return
             vc = ctx.guild.voice_client
             if vc.is_playing():
+                vc.stop()
+                if queues:
+                    embed = discord.Embed(title="Песня была успешно пропущена!",
+                                          description=now[ctx.message.guild.id],
+                                          colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                       random.randrange(0, 255),
+                                                                                       random.randrange(0, 255)))
+                    mes = await ctx.reply(embed=embed, mention_author=False)
+                    await mes.add_reaction('✅')
+            elif vc.is_paused():
+                vc.resume()
                 vc.stop()
                 if queues:
                     embed = discord.Embed(title="Песня была успешно пропущена!",
@@ -571,7 +692,7 @@ class Speedwagon(commands.Cog):
     async def queue(self, ctx):
         global queues_n, queues, now
         id = ctx.message.guild.id
-        if id in queues and vc.is_playing():
+        if id in queues and (vc.is_playing() or vc.is_paused()):
             q = queues_n[ctx.message.guild.id]
             embed = discord.Embed(title='Текущая очередь из песен:', colour=discord.Color.from_rgb(random.randrange(0, 255),
                                                                                        random.randrange(0, 255),
@@ -590,6 +711,10 @@ class Speedwagon(commands.Cog):
 
     @commands.command(aliases=['l', 'д'])
     async def leave(self, ctx):
+        connected = ctx.author.voice
+        if not connected:
+            await ctx.reply("Ну сам-то зайди тоже", mention_author=False)
+            return
         if ctx.voice_client:
             id = ctx.message.guild.id
             await ctx.voice_client.disconnect()
@@ -663,7 +788,7 @@ class Speedwagon(commands.Cog):
     @commands.command(name='rofl_h')
     async def rofl_h(self, ctx):
         try:
-            embed = discord.Embed(title="Список команд для !rofl:", description="""
+            embed = discord.Embed(title="Список команд для -rofl:", description="""
                         1 - Анекдот;
                         2 - Рассказы;
                         3 - Стишки;
@@ -687,7 +812,22 @@ class Speedwagon(commands.Cog):
     @commands.command(name='rofl')
     async def rofl(self, ctx):
         try:
-            n = ctx.message.content.split('!rofl ')[-1].strip()
+            sl = {'1': '1',
+                '2': '2',
+                '3': '3',
+                '4': '4',
+                '5': '5',
+                '6': '6',
+                '7': '8',
+                '8': '11',
+                '9': '12',
+                '10': '13',
+                '11': '14',
+                '12': '15',
+                '13': '16',
+                '14': '18',}
+            n = ctx.message.content.split('-rofl ')[-1].strip()
+            n = sl[n]
             res = requests.get(f'http://rzhunemogu.ru/RandJSON.aspx?CType={n}').text
             res = res.replace('"content":"', "'content':'")
             res = res.replace('"}', "'}")
@@ -707,10 +847,11 @@ class Speedwagon(commands.Cog):
             itog = itog.replace('     ', '\r')
             await ctx.reply(itog, mention_author=False)
         except Exception:
-            await ctx.reply('Категории смешнявок можно изучить, вызвав команду !rofl_h', mention_author=False)
+            await ctx.reply('Категории смешнявок можно изучить, вызвав команду -rofl_h', mention_author=False)
 
 
 if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
     bot.add_cog(Speedwagon(bot))
-    bot.run(os.getenv('TOKEN'))
+    keep_alive.keep_alive()
+    bot.run(os.environ['TOKEN'])
