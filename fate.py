@@ -116,30 +116,34 @@ async def on_message(message):
         pass
     # вот тут СГЛЫПА
     db_sess = db_session.create_session()
-    if len(db_sess.query(User).all()) < 500:
-        if message.content:
-            user = User()
-            user.name = message.author.name + message.author.discriminator
-            user.message = message.content
-            db_sess.add(user)
-            db_sess.commit()
-    else:
-        db_sess.query(User).filter(User.id == 1).delete()
-        db_sess.commit()
-        for userr in db_sess.query(User).all():
-            userr.id -= 1
-        db_sess.commit()
-        user = User()
-        user.name = message.author.name + message.author.discriminator
-        user.message = message.content
-        mes_pul = db_sess.query(User).filter(
-            User.message.in_(message.content.split()) | User.message.like('%' + message.content + '%')).all()
-        if mes_pul:
-            a = random.choice(mes_pul).message
-            if a != message.content:
-                await message.channel.send(a)
-        db_sess.add(user)
-        db_sess.commit()
+    if message.content[0] != '-':
+      if len(db_sess.query(User).filter(User.name_channel == message.guild.name).all()) < 500:
+          if message.content:
+              user = User()
+              user.name_channel = message.guild.name
+              user.name = message.author.name + message.author.discriminator
+              user.message = message.content
+              db_sess.add(user)
+              db_sess.commit()
+      else:
+          id_u = db_sess.query(User).filter(User.name_channel == message.guild.name).all()[0].id
+          db_sess.query(User).filter(User.id == id_u).delete()
+          db_sess.commit()
+          for userr in db_sess.query(User).all()[id_u - 1:]:
+              userr.id -= 1
+          db_sess.commit()
+          user = User()
+          user.name_channel = message.guild.name
+          user.name = message.author.name + message.author.discriminator
+          user.message = message.content
+          mes_pul = db_sess.query(User).filter(
+              User.message.in_(message.content.split()) | User.message.like('%' + message.content + '%')).all()
+          if mes_pul:
+              a = random.choice(mes_pul).message
+              if a != message.content and random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) == 0:
+                  await message.channel.send(a)
+          db_sess.add(user)
+          db_sess.commit()
     # конец СГЛЫПЫ
     if random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) == 3:
         sp = ['👎', '👍', '😭', '😎', '😋', '😠', '🤮'] + [bot.get_emoji(e.id) for e in message.guild.emojis]
