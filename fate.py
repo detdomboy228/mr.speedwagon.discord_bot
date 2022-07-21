@@ -63,7 +63,8 @@ ffmpeg, ffprobe = run.get_or_fetch_platform_executables_else_raise()
 def check_queue(ctx, id):
     global queues_n, queues, prev, prev_n, now
     if queues[id] != {}:
-        discord.opus.load_opus("opus")
+        if not discord.opus.is_loaded():
+            discord.opus.load_opus('libopus.so')
         vc = ctx.guild.voice_client
         try:
             source = queues[id][0]
