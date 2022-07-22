@@ -165,7 +165,7 @@ async def on_message(message):
           db_sess.add(user)
           db_sess.commit()
     # конец СГЛЫПЫ
-    if random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) == 3:
+    if random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) == 3:
         sp = ['👎', '👍', '😭', '😎', '😋', '😠', '🤮'] + [bot.get_emoji(e.id) for e in message.guild.emojis]
         await message.add_reaction(random.choice(sp))
     await bot.process_commands(message)
@@ -425,6 +425,7 @@ class Speedwagon(commands.Cog):
         embed.add_field(name="-skip или -s", value="Пропускает музыку, которая идет сейчас;", inline=False)
         embed.add_field(name="-leave или -l", value="Покидает голосовой канал;", inline=False)
         embed.add_field(name="-mem (число)", value="Выдает шаблон для мема;", inline=False)
+        embed.add_field(name="-getmem", value="Выдает случайный мем с реддита;", inline=False)
         embed.add_field(name="-mem_h (число страницы)", value="Выдает список самых популярных шаблонов для мемов;", inline=False)
         embed.add_field(name="-wiki (ваш запрос)", value="Выдает краткую информацию о том, что вы ищете, из Википедии;", inline=False)
         embed.add_field(name="-we (город или населенный пункт)", value="""Присылает текущее состояние погоды
@@ -776,6 +777,20 @@ class Speedwagon(commands.Cog):
         except Exception:
             await ctx.reply('Видимо, ты забыл написать цифру после команды или же просто допустил ошибку(',
                             mention_author=False)
+
+    @commands.command(name='getmem')
+    async def getmem(self, ctx):
+        try:
+            if len(ctx.message.content.split()) == 1:
+                res = (requests.get('https://meme-api.herokuapp.com/gimme')).json()
+                mem = res['url']
+                await ctx.reply(mem, mention_author=False)
+            else:
+                await ctx.reply('Видимо, ты лишка чего-то понавыписывал(', mention_author=False)
+        except Exception:
+            await ctx.reply('ALARM!ALARM! ВОЗНИКЛА ОШИБКА! ALARM!ALARM!', mention_author=False)
+            return
+
 
     @commands.command(name='mem_h')
     async def mem_h(self, ctx):
