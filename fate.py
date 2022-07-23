@@ -26,6 +26,7 @@ logger.setLevel(logging.WARNING)
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
+client = discord.Client()
 bot = commands.Bot(command_prefix='-')
 YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'False', 'simulate': 'True',
                'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio',
@@ -75,6 +76,7 @@ def check_queue(ctx, id):
                 prev_n[id] = now[id]
                 prev[id] = source
             now[id] = queues_n[id][0]
+            asyncio.run_coroutine_threadsafe(send_message_to_channel(ctx, easy_convert(now[id])[-1]), client.loop)
             vc.play(source, after=lambda x=0: check_queue(ctx, ctx.message.guild.id))
             del queues_n[id][0]
             del queues[id][0]
@@ -99,13 +101,38 @@ def get_wiki_image(search_term):
         wi.set_lang('ru')
         wkpage = wi.WikipediaPage(title = result[0])
         title = wkpage.title
-        response  = requests.get(WIKI_REQUEST+title)
+        response = requests.get(WIKI_REQUEST+title)
         json_data = json.loads(response.text)
         img_link = list(json_data['query']['pages'].values())[0]['original']['source']
         print(img_link)
         return img_link
     except:
        return 0
+
+async def send_message_to_channel(ctx, sss):
+    embed = discord.Embed(title='Сейчас играет:', colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                             random.randrange(0, 255),
+                                                                             random.randrange(0, 255)),
+                          url=sss['webpage_url'],
+                          description=sss['title'])
+    embed.set_author(name=sss['uploader'])
+    embed.set_thumbnail(url=sss['thumbnails'][0]['url'])
+    if int(sss['duration']) > 60:
+        m = int(sss['duration']) // 60
+        s = int(sss['duration']) - int(sss['duration']) // 60 * 60
+        if m > 60:
+            ch = m // 60
+            ost_m = m - ch * 60
+            embed.add_field(name="Длительность: ",
+                            value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
+        else:
+            embed.add_field(name="Длительность: ",
+                            value=str(m) + ' м. ' + str(s) + ' c.')
+    else:
+        embed.add_field(name="Длительность: ",
+                        value=str(sss['duration']) + ' c.')
+    mes = await ctx.reply(embed=embed, mention_author=False)
+    await mes.add_reaction('✅')
 
 @bot.event
 async def on_ready():
@@ -267,31 +294,18 @@ class Speedwagon(commands.Cog):
                                                                         random.randrange(0, 255),
                                                                         random.randrange(0, 255)),
                                           description=str(e)), mention_author=False)
-        embed = discord.Embed(title='Отмотано к:', colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                 random.randrange(0, 255),
-                                                                                 random.randrange(0, 255)),
-                              url=sss['webpage_url'],
-                              description=sss['title'])
-        embed.set_author(name=sss['uploader'])
-        embed.set_thumbnail(url=sss['thumbnails'][0]['url'])
         if int(sss['duration']) > 60:
             m = int(sss['duration']) // 60
             s = int(sss['duration']) - int(sss['duration']) // 60 * 60
             if m > 60:
                 ch = m // 60
                 ost_m = m - ch * 60
-                embed.add_field(name="Длительность: ",
-                                value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
                 queues_n[id].append(
                     sss['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
             else:
-                embed.add_field(name="Длительность: ",
-                                value=str(m) + ' м. ' + str(s) + ' c.')
                 queues_n[id].append(sss['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')
 
         else:
-            embed.add_field(name="Длительность: ",
-                            value=str(sss['duration']) + ' c.')
             queues_n[id].append(sss['title'] + ' --- ' + str(sss['duration']) + ' c.')
         if len(queues[id]) >= 1:
             queues[id] = [a] + [easy_convert(now[id])[0]] + queues[id][:-1]
@@ -305,8 +319,6 @@ class Speedwagon(commands.Cog):
         print(prev_n[id])
         vc.stop()
         check_queue(ctx, id)
-        mes = await ctx.reply(embed=embed, mention_author=False)
-        await mes.add_reaction('✅')
 
     @commands.command(name='we')
     async def we(self, ctx):
@@ -530,41 +542,23 @@ class Speedwagon(commands.Cog):
             await mes.add_reaction('✅')
         else:
             b = info
-            embed = discord.Embed(title="Сейчас играет:", url=b['webpage_url'],
-                                  description=b['title'],
-                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
-            embed.set_author(name=b['uploader'])
-            embed.set_thumbnail(url=b['thumbnails'][0]['url'])
             if int(b['duration']) > 60:
                 m = int(b['duration']) // 60
                 s = int(b['duration']) - int(b['duration']) // 60 * 60
                 if m > 60:
                     ch = m // 60
                     ost_m = m - ch * 60
-                    embed.add_field(name="Длительность: ",
-                                    value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
                     queues_n[guild_id].append(
                         b['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
                 else:
-                    embed.add_field(name="Длительность: ",
-                                    value=str(m) + ' м. ' + str(s) + ' c.')
                     queues_n[guild_id].append(b['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')
-
             else:
-                embed.add_field(name="Длительность: ",
-                                value=str(b['duration']) + ' c.')
                 queues_n[guild_id].append(b['title'] + ' --- ' + str(b['duration']) + ' c.')
             if guild_id in queues:
                 queues[guild_id].append((FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS)))
             else:
                 queues[guild_id] = [(FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS))]
             check_queue(ctx, guild_id)
-            embed.add_field(name="Если уже долго не играет: ",
-                                value="*Это может быть проблема с сервером, попробуйте повторить запрос*", inline=False)
-            mes = await ctx.reply(embed=embed, mention_author=False)
-            await mes.add_reaction('✅')
 
     @commands.command()
     async def play(self, ctx):
@@ -614,21 +608,12 @@ class Speedwagon(commands.Cog):
                                queues[guild_id]
         else:
             queues[guild_id] = [(FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS))]
-        embed = discord.Embed(title="Сейчас заиграет:", url=b['webpage_url'],
-                              description=b['title'],
-                              colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
-        embed.set_author(name=b['uploader'])
-        embed.set_thumbnail(url=b['thumbnails'][0]['url'])
         if int(b['duration']) > 60:
             m = int(b['duration']) // 60
             s = int(b['duration']) - int(b['duration']) // 60 * 60
             if m > 60:
                 ch = m // 60
                 ost_m = m - ch * 60
-                embed.add_field(name="Длительность: ",
-                                value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
                 if guild_id in queues_n:
                     queues_n[guild_id] = [(b['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(
                         s) + ' c.')] \
@@ -637,17 +622,12 @@ class Speedwagon(commands.Cog):
                     queues_n[guild_id] = [
                         (b['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')]
             else:
-                embed.add_field(name="Длительность: ",
-                                value=str(m) + ' м. ' + str(s) + ' c.')
                 if guild_id in queues_n:
                     queues_n[guild_id] = [(b['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')] + queues_n[
                         guild_id]
                 else:
                     queues_n[guild_id] = [(b['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')]
-
         else:
-            embed.add_field(name="Длительность: ",
-                            value=str(b['duration']) + ' c.')
             if guild_id in queues_n:
                 queues_n[guild_id] = [(b['title'] + ' --- ' + str(b['duration']) + ' c.')] + queues_n[guild_id]
             else:
@@ -656,8 +636,6 @@ class Speedwagon(commands.Cog):
             vc.stop()
         else:
             check_queue(ctx, guild_id)
-        mes = await ctx.reply(embed=embed, mention_author=False)
-        await mes.add_reaction('✅')
 
     @commands.command(aliases=['c', 'с'])
     async def clear(self, ctx):
