@@ -1,5 +1,7 @@
 from data import db_session
 from data.users import User
+import urllib.request
+import re
 from static_ffmpeg import run
 import wikipedia as wi
 import discord
@@ -58,16 +60,21 @@ WIKI_REQUEST = 'http://ru.wikipedia.org/w/api.php?action=query&prop=pageimages&f
 now = {}
 prev = {}
 prev_n = {}
+is_potok = {}
+str_pr = {}
 ffmpeg, ffprobe = run.get_or_fetch_platform_executables_else_raise()
 
 
 def check_queue(ctx, id):
     global queues_n, queues, prev, prev_n, now
     if queues[id] != {}:
-        if not discord.opus.is_loaded():
-            discord.opus.load_opus('libopus.so')
+        #if not discord.opus.is_loaded():
+        #    discord.opus.load_opus('libopus.so')
         vc = ctx.guild.voice_client
         try:
+            if ctx.message.guild.id in is_potok:
+                if is_potok[ctx.message.guild.id] is True:
+                    return
             source = queues[id][0]
             if id not in now:
                 prev_n[id] = 'rick astley - never gonna give you up --- 3 м. 32 с.'
@@ -86,6 +93,56 @@ def check_queue(ctx, id):
             queues_n[id] = []
             queues[id] = []
 
+
+def check_potok(ctx, url, info, id):
+    global queues_n, queues, prev, prev_n, now, str_pr
+    # if not discord.opus.is_loaded():
+    #    discord.opus.load_opus('libopus.so')
+    if not ctx.voice_client or not is_potok[id]:
+        return
+    if id not in str_pr:
+        str_pr[id] = [info['title']]
+    else:
+        if len(str_pr[id]) >= 10:
+            del str_pr[id][0]
+        str_pr[id].append(info['title'])
+    vc = ctx.guild.voice_client
+    source = easy_convert(info['title'])[0]
+    html = urllib.request.urlopen(url)
+    video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+    spis = []
+    for e in video_ids:
+        if e not in spis:
+            spis.append(e)
+    for e in spis:
+        try:
+            name = easy_convert("https://www.youtube.com/watch?v=" + e)[-1]['title']
+        except Exception:
+            continue
+        if name not in str_pr[id]:
+            counter = 0
+            for e1 in info['title'].split():
+                if e1 in name.split():
+                    counter += 1
+            if counter * 100 / len(name.split()) < 65:
+                aboba = ("https://www.youtube.com/watch?v=" + e)
+                break
+    now[id] = info['title'] + ' --- '
+    if int(info['duration']) > 60:
+        m = int(info['duration']) // 60
+        s = int(info['duration']) - int(info['duration']) // 60 * 60
+        if m > 60:
+            ch = m // 60
+            ost_m = m - ch * 60
+            now[id] += (str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
+        else:
+            now[id] += (str(m) + ' м. ' + str(s) + ' c.')
+    else:
+        now[id] += (str(info['duration']) + ' c.')
+    asyncio.run_coroutine_threadsafe(send_message_to_channel(ctx, easy_convert(info['title'])[-1]), client.loop)
+    vc.play(source, after=lambda x=0: check_potok(ctx, aboba,
+                                                    easy_convert(aboba)[-1],
+                                                    id))
 
 def easy_convert(name):
     name = name.split(' --- ')[0]
@@ -131,7 +188,7 @@ async def send_message_to_channel(ctx, sss):
     else:
         embed.add_field(name="Длительность: ",
                         value=str(sss['duration']) + ' c.')
-    mes = await ctx.reply(embed=embed, mention_author=False)
+    mes = await ctx.send(embed=embed)
     await mes.add_reaction('✅')
 
 @bot.event
@@ -280,6 +337,14 @@ class Speedwagon(commands.Cog):
     @commands.command(name='back', aliases=['b'])
     async def back(self, ctx):
         global queues_n, queues, prev, prev_n, now
+        if ctx.message.guild.id in is_potok:
+            if is_potok[ctx.message.guild.id] is True:
+                embed = discord.Embed(title='Недоступно во время потока(', colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                               random.randrange(0, 255),
+                                                                                               random.randrange(0, 255)))
+                mes = await ctx.reply(embed=embed, mention_author=False)
+                await mes.add_reaction('❌')
+                return
         id = ctx.message.guild.id
         try:
             a = easy_convert(prev_n[id])[0]
@@ -433,6 +498,8 @@ class Speedwagon(commands.Cog):
              желаемую музыку;""", inline=False)
         embed.add_field(name="-play (желаемая песня)", value="""Включит в вашем голосовом канале
                      желаемую музыку, не обращая внимания на очередь;""", inline=False)
+        embed.add_field(name="-stream/potok (желаемая песня)", value="""Включит в вашем голосовом канале бесконечную
+         подборку музыки, основанную на вашем запросе;""", inline=False)
         embed.add_field(name="-clear или -c", value="Очищает очередь из музыки;", inline=False)
         embed.add_field(name="-skip или -s", value="Пропускает музыку, которая идет сейчас;", inline=False)
         embed.add_field(name="-leave или -l", value="Покидает голосовой канал;", inline=False)
@@ -466,7 +533,7 @@ class Speedwagon(commands.Cog):
 
     @commands.command(aliases=['pl'])
     async def p(self, ctx):
-        global vc, url, ydl, queues_n, queues
+        global vc, url, ydl, queues_n, queues, is_potok
         connected = ctx.author.voice
         ss = ctx.message.content.split()[0] + ' '
         url = ctx.message.content.split(ss)[-1]
@@ -478,7 +545,18 @@ class Speedwagon(commands.Cog):
         else:
             vc = ctx.guild.voice_client
         ydl = YoutubeDL(YDL_OPTIONS)
+        guild_id = ctx.message.guild.id
         try:
+            if guild_id in is_potok:
+                if is_potok[guild_id] is True:
+                    embed = discord.Embed(title="Ошибка воспроизведения:",
+                                          description='Недоступно во время потока(',
+                                          colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                        random.randrange(0, 255),
+                                                                        random.randrange(0, 255)))
+                    mes = await ctx.reply(embed=embed, mention_author=False)
+                    await mes.add_reaction('❌')
+                    return
             ydl.cache.remove()
             if 'https://' in url:
                 info = ydl.extract_info(url, download=False)
@@ -503,7 +581,6 @@ class Speedwagon(commands.Cog):
             await mes.add_reaction('❌')
             return
         arg = info['formats'][0]['url']
-        guild_id = ctx.message.guild.id
         if guild_id not in queues_n:
             queues_n[guild_id] = []
         if vc.is_paused() or vc.is_playing():
@@ -560,6 +637,65 @@ class Speedwagon(commands.Cog):
                 queues[guild_id] = [(FFmpegPCMAudio(executable=ffmpeg, source=arg, **FFMPEG_OPTIONS))]
             check_queue(ctx, guild_id)
 
+    @commands.command(aliases=['pot', 'str', 'stream', 'wave', 'wv'])
+    async def potok(self, ctx):
+        global vc, url, ydl, queues_n, queues, is_potok
+        connected = ctx.author.voice
+        ss = ctx.message.content.split()[0] + ' '
+        url = ctx.message.content.split(ss)[-1]
+        if not connected:
+            await ctx.reply("Ну сам-то зайди тоже", mention_author=False)
+            return
+        if not ctx.voice_client:
+            vc = await connected.channel.connect()
+        else:
+            vc = ctx.guild.voice_client
+        ydl = YoutubeDL(YDL_OPTIONS)
+        try:
+            ydl.cache.remove()
+            if 'https://' in url:
+                info = ydl.extract_info(url, download=False)
+            else:
+                info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+                url = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]['webpage_url']
+            if not info:
+                embed = discord.Embed(title="Ошибка воспроизведения:",
+                                      description='Отказано в доступе к сервису;\nПопробуйте еще раз!',
+                                      colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                    random.randrange(0, 255),
+                                                                    random.randrange(0, 255)))
+                mes = await ctx.reply(embed=embed, mention_author=False)
+                await mes.add_reaction('❌')
+                return
+        except Exception as e:
+            embed = discord.Embed(title="Ошибка воспроизведения:",
+                                  description=e,
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)))
+            mes = await ctx.reply(embed=embed, mention_author=False)
+            await mes.add_reaction('❌')
+            return
+        guild_id = ctx.message.guild.id
+        if vc.is_paused() or vc.is_playing():
+            embed = discord.Embed(title="Ошибка воспроизведения:",
+                                  description="Невозможно инициализировать поток, пока ваша очередь непуста",
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)))
+            mes = await ctx.reply(embed=embed, mention_author=False)
+            await mes.add_reaction('❌')
+            return
+        else:
+            embed = discord.Embed(title="Успех! Приятного прослушивания",
+                                  description="(Функция находится в стадии разработки!!!)",
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)))
+            await ctx.reply(embed=embed, mention_author=False)
+            is_potok[guild_id] = True
+            check_potok(ctx, url, info, guild_id)
+
     @commands.command()
     async def play(self, ctx):
         global vc, url, ydl, queues_n, queues
@@ -574,7 +710,18 @@ class Speedwagon(commands.Cog):
         else:
             vc = ctx.guild.voice_client
         ydl = YoutubeDL(YDL_OPTIONS)
+        guild_id = ctx.message.guild.id
         try:
+            if guild_id in is_potok:
+                if is_potok[guild_id] is True:
+                    embed = discord.Embed(title="Ошибка воспроизведения:",
+                                          description='Недоступно во время потока(',
+                                          colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                        random.randrange(0, 255),
+                                                                        random.randrange(0, 255)))
+                    mes = await ctx.reply(embed=embed, mention_author=False)
+                    await mes.add_reaction('❌')
+                    return
             ydl.cache.remove()
             if 'https://' in url:
                 info = ydl.extract_info(url, download=False)
@@ -599,7 +746,6 @@ class Speedwagon(commands.Cog):
             await mes.add_reaction('❌')
             return
         arg = info['formats'][0]['url']
-        guild_id = ctx.message.guild.id
         if guild_id not in queues_n:
             queues_n[guild_id] = []
         b = info
@@ -653,6 +799,22 @@ class Speedwagon(commands.Cog):
         mes = await ctx.reply(embed=embed, mention_author=False)
         await mes.add_reaction('✅')
 
+    @commands.command()
+    async def stop(self, ctx):
+        global is_potok
+        connected = ctx.author.voice
+        if not connected:
+            await ctx.reply("Ну сам-то зайди тоже", mention_author=False)
+            return
+        is_potok[ctx.message.guild.id] = False
+        vc.stop()
+        embed = discord.Embed(title="Поток успешно остановлен. Захади еще!",
+                              colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                            random.randrange(0, 255),
+                                                            random.randrange(0, 255)))
+        mes = await ctx.reply(embed=embed, mention_author=False)
+        await mes.add_reaction('✅')
+
     @commands.command(aliases=['s', 'ы'])
     async def skip(self, ctx):
         try:
@@ -662,6 +824,17 @@ class Speedwagon(commands.Cog):
                 await ctx.reply("Ну сам-то зайди тоже", mention_author=False)
                 return
             vc = ctx.guild.voice_client
+            if ctx.message.guild.id in is_potok:
+                if is_potok[ctx.message.guild.id] is True:
+                    vc.stop()
+                    embed = discord.Embed(title="Песня была успешно пропущена!",
+                                          description=now[ctx.message.guild.id],
+                                          colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                        random.randrange(0, 255),
+                                                                        random.randrange(0, 255)))
+                    mes = await ctx.reply(embed=embed, mention_author=False)
+                    await mes.add_reaction('✅')
+                    return
             if vc.is_playing():
                 vc.stop()
                 if queues:
@@ -689,6 +862,13 @@ class Speedwagon(commands.Cog):
     @commands.command(aliases=['q', 'й'])
     async def queue(self, ctx):
         global queues_n, queues, now
+        if is_potok[ctx.message.guild.id] is True:
+            embed = discord.Embed(title='Недоступно во время потока(', colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                           random.randrange(0, 255),
+                                                                                           random.randrange(0, 255)))
+            mes = await ctx.reply(embed=embed, mention_author=False)
+            await mes.add_reaction('❌')
+            return
         id = ctx.message.guild.id
         if id in queues and (vc.is_playing() or vc.is_paused()):
             q = queues_n[ctx.message.guild.id]
