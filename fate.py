@@ -145,13 +145,8 @@ def check_potok(ctx, url, info, id):
                                                         easy_convert(aboba)[-1],
                                                         id))
     except Exception as e:
-        embed = discord.Embed(title="Ошибка воспроизведения:",
-                                      description=e,
-                                      colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                          random.randrange(0, 255),
-                                                                                          random.randrange(0, 255)))
-        mes = await ctx.reply(embed=embed, mention_author=False)
-        await mes.add_reaction('❌')
+        asyncio.run_coroutine_threadsafe(errsms(ctx), client.loop)
+        return
         
         
 def easy_convert(name):
@@ -175,6 +170,15 @@ def get_wiki_image(search_term):
         return img_link
     except:
        return 0
+
+async def errsms(ctx):
+    embed = discord.Embed(title="Ошибка воспроизведения:",
+                          description=e,
+                          colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                        random.randrange(0, 255),
+                                                        random.randrange(0, 255)))
+    mes = await ctx.reply(embed=embed, mention_author=False)
+    await mes.add_reaction('❌')
 
 async def send_message_to_channel(ctx, sss):
     embed = discord.Embed(title='Сейчас играет:', colour=discord.Color.from_rgb(random.randrange(0, 255),
