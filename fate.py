@@ -139,11 +139,21 @@ def check_potok(ctx, url, info, id):
             now[id] += (str(m) + ' м. ' + str(s) + ' c.')
     else:
         now[id] += (str(info['duration']) + ' c.')
-    asyncio.run_coroutine_threadsafe(send_message_to_channel(ctx, easy_convert(info['title'])[-1]), client.loop)
-    vc.play(source, after=lambda x=0: check_potok(ctx, aboba,
-                                                    easy_convert(aboba)[-1],
-                                                    id))
-
+    try:
+        asyncio.run_coroutine_threadsafe(send_message_to_channel(ctx, easy_convert(info['title'])[-1]), client.loop)
+        vc.play(source, after=lambda x=0: check_potok(ctx, aboba,
+                                                        easy_convert(aboba)[-1],
+                                                        id))
+    except Exception as e:
+        embed = discord.Embed(title="Ошибка воспроизведения:",
+                                      description=e,
+                                      colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                                          random.randrange(0, 255),
+                                                                                          random.randrange(0, 255)))
+        mes = await ctx.reply(embed=embed, mention_author=False)
+        await mes.add_reaction('❌')
+        
+        
 def easy_convert(name):
     name = name.split(' --- ')[0]
     info = ydl.extract_info(f"ytsearch:{name}", download=False)['entries'][0]
