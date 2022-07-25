@@ -68,8 +68,8 @@ ffmpeg, ffprobe = run.get_or_fetch_platform_executables_else_raise()
 def check_queue(ctx, id):
     global queues_n, queues, prev, prev_n, now
     if queues[id] != {}:
-        #if not discord.opus.is_loaded():
-        #    discord.opus.load_opus('libopus.so')
+        if not discord.opus.is_loaded():
+            discord.opus.load_opus('libopus.so')
         vc = ctx.guild.voice_client
         try:
             if ctx.message.guild.id in is_potok:
@@ -96,8 +96,8 @@ def check_queue(ctx, id):
 
 def check_potok(ctx, url, info, id):
     global queues_n, queues, prev, prev_n, now, str_pr
-    # if not discord.opus.is_loaded():
-    #    discord.opus.load_opus('libopus.so')
+    if not discord.opus.is_loaded():
+       discord.opus.load_opus('libopus.so')
     if not ctx.voice_client or not is_potok[id]:
         return
     if id not in str_pr:
@@ -145,7 +145,7 @@ def check_potok(ctx, url, info, id):
                                                         easy_convert(aboba)[-1],
                                                         id))
     except Exception as e:
-        asyncio.run_coroutine_threadsafe(errsms(ctx), client.loop)
+        asyncio.run_coroutine_threadsafe(errsms(ctx, e), client.loop)
         return
         
         
@@ -171,7 +171,7 @@ def get_wiki_image(search_term):
     except:
        return 0
 
-async def errsms(ctx):
+async def errsms(ctx, e):
     embed = discord.Embed(title="Ошибка воспроизведения:",
                           description=e,
                           colour=discord.Color.from_rgb(random.randrange(0, 255),
