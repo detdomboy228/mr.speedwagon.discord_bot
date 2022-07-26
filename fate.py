@@ -514,6 +514,7 @@ class Speedwagon(commands.Cog):
                      желаемую музыку, не обращая внимания на очередь;""", inline=False)
         embed.add_field(name="-stream/potok (желаемая песня)", value="""Включит в вашем голосовом канале бесконечную
          подборку музыки, основанную на вашем запросе;""", inline=False)
+        embed.add_field(name="-stop", value="""Выключит действующий поток;""", inline=False)
         embed.add_field(name="-clear или -c", value="Очищает очередь из музыки;", inline=False)
         embed.add_field(name="-skip или -s", value="Пропускает музыку, которая идет сейчас;", inline=False)
         embed.add_field(name="-leave или -l", value="Покидает голосовой канал;", inline=False)
