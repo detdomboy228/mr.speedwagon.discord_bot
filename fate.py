@@ -39,23 +39,34 @@ queues_n = {}
 sl_weather = {'clear': ['ясно', f'https://angarsk38.ru/wp-content/uploads/2018/06/15.jpg'],
               'partly-cloudy': ['малооблачно', f'https://region.center/source/VLADIMIR/2019/priroda/UUaXmnVzOl8.jpg'],
               'cloudy': ['облачно с прояснениями', f'http://dvinatoday.ru/upload/iblock/f93/072001_1394511601.jpg'],
-              'overcast': ['пасмурно', f'https://get.wallhere.com/photo/landscape-monochrome-architecture-building-sky-rain-photography-clouds-house-lightning-storm-England-evening-town-atmosphere-summer-British-thunder-Olympus-cloud-stormy-tree-cloudy-weather-houses-roof-cloudsstormssunsetssunrises-olympusomd-facade-black-and-white-monochrome-photography-residential-area-meteorological-phenomenon-cumulus-phenomenon-883443.jpg'],
-              'drizzle': ['морось', f'https://vsegda-pomnim.com/uploads/posts/2022-02/1645905858_2-vsegda-pomnim-com-p-moros-foto-7.jpg'],
+              'overcast': ['пасмурно',
+                           f'https://get.wallhere.com/photo/landscape-monochrome-architecture-building-sky-rain-photography-clouds-house-lightning-storm-England-evening-town-atmosphere-summer-British-thunder-Olympus-cloud-stormy-tree-cloudy-weather-houses-roof-cloudsstormssunsetssunrises-olympusomd-facade-black-and-white-monochrome-photography-residential-area-meteorological-phenomenon-cumulus-phenomenon-883443.jpg'],
+              'drizzle': ['морось',
+                          f'https://vsegda-pomnim.com/uploads/posts/2022-02/1645905858_2-vsegda-pomnim-com-p-moros-foto-7.jpg'],
               'light-rain': ['небольшой дождь', f'https://miro.medium.com/max/960/1*QbCmpwz1y-QHT4AzCZ9Fbg.jpeg'],
               'rain': ['дождь', f'https://proza.ru/pics/2020/08/03/94.jpg'],
-              'moderate-rain': ['умеренно сильный дождь', f'https://zanmsk.ru/wp-content/uploads/2019/08/ba956e0470cdd6a2ab6c7fafffdb9786978dc9c9.jpg'],
-              'heavy-rain': ['сильный дождь', f'https://avatars.mds.yandex.net/get-zen_doc/4375924/pub_60aca366d001161964edeae2_60aca3a3e3047f5161c1680a/scale_1200'],
-              'continuous-heavy-rain': ['длительный сильный дождь', f'https://gazetaingush.ru/sites/default/files/news/20170623-v-ingushetii-ozhidayutsya-silnye-dozhdi-s-grozoy-i-gradom-mchs/dozhd_0.jpg'],
+              'moderate-rain': ['умеренно сильный дождь',
+                                f'https://zanmsk.ru/wp-content/uploads/2019/08/ba956e0470cdd6a2ab6c7fafffdb9786978dc9c9.jpg'],
+              'heavy-rain': ['сильный дождь',
+                             f'https://avatars.mds.yandex.net/get-zen_doc/4375924/pub_60aca366d001161964edeae2_60aca3a3e3047f5161c1680a/scale_1200'],
+              'continuous-heavy-rain': ['длительный сильный дождь',
+                                        f'https://gazetaingush.ru/sites/default/files/news/20170623-v-ingushetii-ozhidayutsya-silnye-dozhdi-s-grozoy-i-gradom-mchs/dozhd_0.jpg'],
               'showers': ['ливень', f'https://dela.ru/medianew/img/1-9326785.jpg'],
-              'wet-snow': ['дождь со снегом', f'https://veved.ru/uploads/posts/2020-04/1587557186_d0b2619858db4e9bb83f12fb74d9f34f.max-1200x800.jpg'],
-              'light-snow': ['небольшой снег', f'https://img5.goodfon.ru/original/960x854/b/e6/kot-ryzhii-zima-sneg-snegopad.jpg'],
+              'wet-snow': ['дождь со снегом',
+                           f'https://veved.ru/uploads/posts/2020-04/1587557186_d0b2619858db4e9bb83f12fb74d9f34f.max-1200x800.jpg'],
+              'light-snow': ['небольшой снег',
+                             f'https://img5.goodfon.ru/original/960x854/b/e6/kot-ryzhii-zima-sneg-snegopad.jpg'],
               'snow': ['снег', f'https://proprikol.ru/wp-content/uploads/2020/07/kartinki-idet-sneg-9.jpg'],
               'snow-showers': ['снегопад', f'https://ulpravda.ru/pictures/news/big/100703_big.jpg'],
               'hail': ['град', f'https://misanec.ru/wp-content/uploads/2018/07/grad.jpg'],
-              'thunderstorm': ['гроза', f'https://proprikol.ru/wp-content/uploads/2019/12/kartinki-pro-molniyu-i-grozu-26.jpg'],
-              'thunderstorm-with-rain': ['дождь с грозой', f'https://static.mk.ru/upload/entities/2021/06/14/07/articles/facebookPicture/44/56/2a/d8/d41aa129d36ecf5f701a7f16e12a510e.jpg'],
-              'thunderstorm-with-hail': ['гроза с градом', f'https://gorzavod.ru/wp-content/uploads/2019/07/llcUwlh_28k.jpg'],
-              'cloudy-and-rain': ['облачно с дождем', f'https://avatars.mds.yandex.net/i?id=261b500f7f8885682b96e12db1a3c6b8_l-5315630-images-thumbs&n=13']}
+              'thunderstorm': ['гроза',
+                               f'https://proprikol.ru/wp-content/uploads/2019/12/kartinki-pro-molniyu-i-grozu-26.jpg'],
+              'thunderstorm-with-rain': ['дождь с грозой',
+                                         f'https://static.mk.ru/upload/entities/2021/06/14/07/articles/facebookPicture/44/56/2a/d8/d41aa129d36ecf5f701a7f16e12a510e.jpg'],
+              'thunderstorm-with-hail': ['гроза с градом',
+                                         f'https://gorzavod.ru/wp-content/uploads/2019/07/llcUwlh_28k.jpg'],
+              'cloudy-and-rain': ['облачно с дождем',
+                                  f'https://avatars.mds.yandex.net/i?id=261b500f7f8885682b96e12db1a3c6b8_l-5315630-images-thumbs&n=13']}
 WIKI_REQUEST = 'http://ru.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles='
 now = {}
 prev = {}
@@ -68,8 +79,8 @@ ffmpeg, ffprobe = run.get_or_fetch_platform_executables_else_raise()
 def check_queue(ctx, id):
     global queues_n, queues, prev, prev_n, now
     if queues[id] != {}:
-        if not discord.opus.is_loaded():
-            discord.opus.load_opus('libopus.so')
+        #if not discord.opus.is_loaded():
+        #    discord.opus.load_opus('libopus.so')
         vc = ctx.guild.voice_client
         try:
             if ctx.message.guild.id in is_potok:
@@ -97,7 +108,7 @@ def check_queue(ctx, id):
 def check_potok(ctx, url, info, id):
     global queues_n, queues, prev, prev_n, now, str_pr
     if not discord.opus.is_loaded():
-       discord.opus.load_opus('libopus.so')
+        discord.opus.load_opus('libopus.so')
     if not ctx.voice_client or not is_potok[id]:
         return
     if id not in str_pr:
@@ -142,13 +153,13 @@ def check_potok(ctx, url, info, id):
     try:
         asyncio.run_coroutine_threadsafe(send_message_to_channel(ctx, easy_convert(info['title'])[-1]), client.loop)
         vc.play(source, after=lambda x=0: check_potok(ctx, aboba,
-                                                        easy_convert(aboba)[-1],
-                                                        id))
+                                                      easy_convert(aboba)[-1],
+                                                      id))
     except Exception as e:
         asyncio.run_coroutine_threadsafe(errsms(ctx, e), client.loop)
         return
-        
-        
+
+
 def easy_convert(name):
     name = name.split(' --- ')[0]
     info = ydl.extract_info(f"ytsearch:{name}", download=False)['entries'][0]
@@ -157,19 +168,21 @@ def easy_convert(name):
     os.system('youtube-dl --rm-cache-dir')
     return a, info
 
+
 def get_wiki_image(search_term):
     try:
-        result = wi.search(search_term, results = 1)
+        result = wi.search(search_term, results=1)
         wi.set_lang('ru')
-        wkpage = wi.WikipediaPage(title = result[0])
+        wkpage = wi.WikipediaPage(title=result[0])
         title = wkpage.title
-        response = requests.get(WIKI_REQUEST+title)
+        response = requests.get(WIKI_REQUEST + title)
         json_data = json.loads(response.text)
         img_link = list(json_data['query']['pages'].values())[0]['original']['source']
         print(img_link)
         return img_link
     except:
-       return 0
+        return 0
+
 
 async def errsms(ctx, e):
     embed = discord.Embed(title="Ошибка воспроизведения:",
@@ -180,10 +193,11 @@ async def errsms(ctx, e):
     mes = await ctx.reply(embed=embed, mention_author=False)
     await mes.add_reaction('❌')
 
+
 async def send_message_to_channel(ctx, sss):
     embed = discord.Embed(title='Сейчас играет:', colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                             random.randrange(0, 255),
-                                                                             random.randrange(0, 255)),
+                                                                                random.randrange(0, 255),
+                                                                                random.randrange(0, 255)),
                           url=sss['webpage_url'],
                           description=sss['title'])
     embed.set_author(name=sss['uploader'])
@@ -205,6 +219,7 @@ async def send_message_to_channel(ctx, sss):
     mes = await ctx.send(embed=embed)
     await mes.add_reaction('✅')
 
+
 @bot.event
 async def on_ready():
     global cur, db
@@ -225,7 +240,7 @@ async def on_message(message):
     elif 'кот' in message.content.lower() or 'кош' in message.content.lower():
         r = requests.get('https://api.thecatapi.com/v1/images/search').json()[0]['url']
         await message.channel.send(r)
-    elif 'собак' in message.content.lower() or 'собач' in message.content.lower() or\
+    elif 'собак' in message.content.lower() or 'собач' in message.content.lower() or \
             'пес' in message.content.lower() or 'пёс' in message.content.lower():
         r = requests.get('https://dog.ceo/api/breeds/image/random').json()['message']
         await message.channel.send(r)
@@ -235,33 +250,33 @@ async def on_message(message):
     # вот тут СГЛЫПА
     db_sess = db_session.create_session()
     if message.content[0] != '-':
-      if len(db_sess.query(User).filter(User.name_channel == message.guild.name).all()) < 500:
-          if message.content:
-              user = User()
-              user.name_channel = message.guild.name
-              user.name = message.author.name + message.author.discriminator
-              user.message = message.content
-              db_sess.add(user)
-              db_sess.commit()
-      else:
-          id_u = db_sess.query(User).filter(User.name_channel == message.guild.name).all()[0].id
-          db_sess.query(User).filter(User.id == id_u).delete()
-          db_sess.commit()
-          for userr in db_sess.query(User).all()[id_u - 1:]:
-              userr.id -= 1
-          db_sess.commit()
-          user = User()
-          user.name_channel = message.guild.name
-          user.name = message.author.name + message.author.discriminator
-          user.message = message.content
-          mes_pul = db_sess.query(User).filter(
-              User.message.in_(message.content.split()) | User.message.like('%' + message.content + '%')).all()
-          if mes_pul:
-              a = random.choice(mes_pul).message
-              if a != message.content and random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) == 0:
-                  await message.channel.send(a)
-          db_sess.add(user)
-          db_sess.commit()
+        if len(db_sess.query(User).filter(User.name_channel == message.guild.name).all()) < 500:
+            if message.content:
+                user = User()
+                user.name_channel = message.guild.name
+                user.name = message.author.name + message.author.discriminator
+                user.message = message.content
+                db_sess.add(user)
+                db_sess.commit()
+        else:
+            id_u = db_sess.query(User).filter(User.name_channel == message.guild.name).all()[0].id
+            db_sess.query(User).filter(User.id == id_u).delete()
+            db_sess.commit()
+            for userr in db_sess.query(User).all()[id_u - 1:]:
+                userr.id -= 1
+            db_sess.commit()
+            user = User()
+            user.name_channel = message.guild.name
+            user.name = message.author.name + message.author.discriminator
+            user.message = message.content
+            mes_pul = db_sess.query(User).filter(
+                User.message.in_(message.content.split()) | User.message.like('%' + message.content + '%')).all()
+            if mes_pul:
+                a = random.choice(mes_pul).message
+                if a != message.content and random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) == 0:
+                    await message.channel.send(a)
+            db_sess.add(user)
+            db_sess.commit()
     # конец СГЛЫПЫ
     if random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) == 3:
         sp = ['👎', '👍', '😭', '😎', '😋', '😠', '🤮'] + [bot.get_emoji(e.id) for e in message.guild.emojis]
@@ -284,33 +299,69 @@ class Speedwagon(commands.Cog):
         try:
             wi.set_lang('ru')
             embed = discord.Embed(title='Вот, что удалось найти:',
-                              description=wi.summary(ctx.message.content.split('-wiki ')),
-                              colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                        random.randrange(0, 255),
-                                                                        random.randrange(0, 255)))
+                                  description=wi.summary(ctx.message.content.split('-wiki ')),
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)))
             embed.set_image(url=get_wiki_image(ctx.message.content.split('-wiki ')))
             embed.set_author(name="Wikipedia",
                              icon_url="https://festivalnauki.ru/upload/iblock/10c/10c4220955df61cfc0719fcddc1c52f4.jpg")
             await ctx.reply(embed=embed, mention_author=False)
         except Exception:
-          await ctx.reply("Похоже, где-то была допущена ошибка, или такого вовсе не существует(")
+            await ctx.reply("Похоже, где-то была допущена ошибка, или такого вовсе не существует(")
 
     @commands.command(name='now')
     async def now(self, ctx):
-      try:
-          sss = easy_convert(now[ctx.message.guild.id])[-1]
-          embed = discord.Embed(title='Играет прямо сейчас:', description=now[ctx.message.guild.id].split(' ---')[0],
-                                colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                          random.randrange(0, 255),
-                                                                          random.randrange(0, 255)),
-                                url=sss['webpage_url'])
-          embed.set_author(name=sss['uploader'])
-          embed.set_thumbnail(url=sss['thumbnails'][-1]['url'])
-          embed.add_field(name='Длительность:', value=now[ctx.message.guild.id].split(' --- ')[-1], inline=False)
-          await ctx.reply(embed=embed, mention_author=False)
-      except Exception:
-          await ctx.reply('Видимо, сейчас ничего не играет(', mention_author=False)
-          return
+        try:
+            sss = easy_convert(now[ctx.message.guild.id])[-1]
+            embed = discord.Embed(title='Играет прямо сейчас:', description=now[ctx.message.guild.id].split(' --- ')[0],
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)),
+                                  url=sss['webpage_url'])
+            embed.set_author(name=sss['uploader'])
+            embed.set_thumbnail(url=sss['thumbnails'][-1]['url'])
+            embed.add_field(name='Длительность:', value=now[ctx.message.guild.id].split(' --- ')[-1], inline=False)
+            await ctx.reply(embed=embed, mention_author=False)
+        except Exception:
+            await ctx.reply('Видимо, сейчас ничего не играет(', mention_author=False)
+            return
+
+    @commands.command()
+    async def lyrics(self, ctx):
+        #try:
+        auth = '+'.join(((easy_convert(now[ctx.message.guild.id])[-1]['uploader']) + '+').split())
+        name_full = auth + '+'.join(now[ctx.message.guild.id].split(' --- ')[0].split())
+        html = urllib.request.urlopen(f'https://alloflyrics.cc/search/?s={name_full}').read()
+        url = 'https://alloflyrics.cc/song/' + str(html).split('/song/')[1].split('">')[0]
+        html = str(urllib.request.urlopen(url).read()).split('<p>')[2].split('</p>')[0]
+        html = html.replace('<br>', '\n')
+        html = html.split('<')
+        ht = []
+        for e in html:
+            if ">" not in e:
+                ht.append(e)
+            else:
+                for e1 in e.split('>'):
+                    ht.append(e1)
+        ht = [e for e in ht if e != '']
+        ht = [ht[i] for i in range(len(ht)) if i % 2 == 0]
+        itog = []
+        for e in ht:
+            string = ''
+            for e1 in e:
+                if e1 != '\\':
+                    string += e1
+            itog += string
+        itog = [''.join(itog).split('\n')[0]] + [e[1:] for e in ''.join(itog).split('\n') if
+                                                 e != ''.join(itog).split('\n')[0]]
+        with open("song_text.txt", "w") as file:
+            file.write('\n'.join(itog))
+        await ctx.reply(file=discord.File("song_text.txt"), mention_author=False)
+        os.remove('song_text.txt')
+        #except Exception:
+        #    await ctx.reply('Видимо, произошла ошибка. Текста нема(', mention_author=False)
+        #    return
 
     @commands.command(name='pause')
     async def pause(self, ctx):
@@ -322,8 +373,8 @@ class Speedwagon(commands.Cog):
             vc.pause()
             mes = await ctx.reply(embed=discord.Embed(title='Пауза!',
                                                       colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                        random.randrange(0, 255),
-                                                                        random.randrange(0, 255))),
+                                                                                    random.randrange(0, 255),
+                                                                                    random.randrange(0, 255))),
                                   mention_author=False)
             await mes.add_reaction('✅')
         except Exception:
@@ -353,9 +404,10 @@ class Speedwagon(commands.Cog):
         global queues_n, queues, prev, prev_n, now
         if ctx.message.guild.id in is_potok:
             if is_potok[ctx.message.guild.id] is True:
-                embed = discord.Embed(title='Недоступно во время потока(', colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                               random.randrange(0, 255),
-                                                                                               random.randrange(0, 255)))
+                embed = discord.Embed(title='Недоступно во время потока(',
+                                      colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                    random.randrange(0, 255),
+                                                                    random.randrange(0, 255)))
                 mes = await ctx.reply(embed=embed, mention_author=False)
                 await mes.add_reaction('❌')
                 return
@@ -515,13 +567,16 @@ class Speedwagon(commands.Cog):
         embed.add_field(name="-stream/potok (желаемая песня)", value="""Включит в вашем голосовом канале бесконечную
          подборку музыки, основанную на вашем запросе;""", inline=False)
         embed.add_field(name="-stop", value="""Выключит действующий поток;""", inline=False)
+        embed.add_field(name="-lyrics", value="""Вышлет текст песни, играющей сейчас;""", inline=False)
         embed.add_field(name="-clear или -c", value="Очищает очередь из музыки;", inline=False)
         embed.add_field(name="-skip или -s", value="Пропускает музыку, которая идет сейчас;", inline=False)
         embed.add_field(name="-leave или -l", value="Покидает голосовой канал;", inline=False)
         embed.add_field(name="-mem (число)", value="Выдает шаблон для мема;", inline=False)
         embed.add_field(name="-getmem", value="Выдает случайный мем с реддита;", inline=False)
-        embed.add_field(name="-mem_h (число страницы)", value="Выдает список самых популярных шаблонов для мемов;", inline=False)
-        embed.add_field(name="-wiki (ваш запрос)", value="Выдает краткую информацию о том, что вы ищете, из Википедии;", inline=False)
+        embed.add_field(name="-mem_h (число страницы)", value="Выдает список самых популярных шаблонов для мемов;",
+                        inline=False)
+        embed.add_field(name="-wiki (ваш запрос)", value="Выдает краткую информацию о том, что вы ищете, из Википедии;",
+                        inline=False)
         embed.add_field(name="-we (город или населенный пункт)", value="""Присылает текущее состояние погоды
              в вашем городе или населенном пункте;""", inline=False)
         embed.add_field(name="-rofl_h", value="Помощь по рофлам;", inline=False)
@@ -534,8 +589,8 @@ class Speedwagon(commands.Cog):
     @commands.command(name='filter_h')
     async def filter_h(self, ctx):
         embed = discord.Embed(title='Фотообработчики бота:', colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                                           random.randrange(0, 255),
+                                                                                           random.randrange(0, 255)))
         embed.add_field(name="dem (текст1);(текст2)", value='Создаст демотиватор;', inline=False)
         embed.add_field(name="b-w", value='Создаст черно-белую фотографию;', inline=False)
         embed.add_field(name="quantize", value='Создаст отквантованную фотографию;', inline=False)
@@ -543,7 +598,9 @@ class Speedwagon(commands.Cog):
         embed.add_field(name="negative", value="Инвертирует цвета на фотографии;", inline=False)
         embed.add_field(name="cit (текст);(автор)", value="Создает цитату;", inline=False)
         embed.add_field(name="sh или shakal", value="Сильно повышает резкость изображения;", inline=False)
-        embed.add_field(name="ascii (желаемая ширина изображения в символах)", value="Конвертирует вашу фотографию в текстовый формат по символам таблицы ASCII.", inline=False)
+        embed.add_field(name="ascii (желаемая ширина изображения в символах)",
+                        value="Конвертирует вашу фотографию в текстовый формат по символам таблицы ASCII.",
+                        inline=False)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['pl'])
@@ -581,8 +638,8 @@ class Speedwagon(commands.Cog):
                 embed = discord.Embed(title="Ошибка воспроизведения:",
                                       description='Отказано в доступе к сервису;\nПопробуйте еще раз!',
                                       colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                    random.randrange(0, 255),
+                                                                    random.randrange(0, 255)))
                 mes = await ctx.reply(embed=embed, mention_author=False)
                 await mes.add_reaction('❌')
                 return
@@ -590,8 +647,8 @@ class Speedwagon(commands.Cog):
             embed = discord.Embed(title="Ошибка воспроизведения:",
                                   description=e,
                                   colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)))
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('❌')
             return
@@ -607,8 +664,8 @@ class Speedwagon(commands.Cog):
             embed = discord.Embed(title="Добавлено в очередь:", url=b['webpage_url'],
                                   description=b['title'],
                                   colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)))
             embed.set_author(name=b['uploader'])
             embed.set_thumbnail(url=b['thumbnails'][0]['url'])
             if int(b['duration']) > 60:
@@ -746,8 +803,8 @@ class Speedwagon(commands.Cog):
                 embed = discord.Embed(title="Ошибка воспроизведения:",
                                       description='Отказано в доступе к сервису;\nПопробуйте еще раз!',
                                       colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                    random.randrange(0, 255),
+                                                                    random.randrange(0, 255)))
                 mes = await ctx.reply(embed=embed, mention_author=False)
                 await mes.add_reaction('❌')
                 return
@@ -755,8 +812,8 @@ class Speedwagon(commands.Cog):
             embed = discord.Embed(title="Ошибка воспроизведения:",
                                   description=e,
                                   colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)))
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('❌')
             return
@@ -809,8 +866,8 @@ class Speedwagon(commands.Cog):
         queues_n = {}
         embed = discord.Embed(title="Очередь была полностью очищена!",
                               colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                            random.randrange(0, 255),
+                                                            random.randrange(0, 255)))
         mes = await ctx.reply(embed=embed, mention_author=False)
         await mes.add_reaction('✅')
 
@@ -856,8 +913,8 @@ class Speedwagon(commands.Cog):
                     embed = discord.Embed(title="Песня была успешно пропущена!",
                                           description=now[ctx.message.guild.id],
                                           colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                        random.randrange(0, 255),
+                                                                        random.randrange(0, 255)))
                     mes = await ctx.reply(embed=embed, mention_author=False)
                     await mes.add_reaction('✅')
             elif vc.is_paused():
@@ -867,8 +924,8 @@ class Speedwagon(commands.Cog):
                     embed = discord.Embed(title="Песня была успешно пропущена!",
                                           description=now[ctx.message.guild.id],
                                           colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                        random.randrange(0, 255),
+                                                                        random.randrange(0, 255)))
                     mes = await ctx.reply(embed=embed, mention_author=False)
                     await mes.add_reaction('✅')
         except IndexError:
@@ -877,19 +934,22 @@ class Speedwagon(commands.Cog):
     @commands.command(aliases=['q', 'й'])
     async def queue(self, ctx):
         global queues_n, queues, now
-        if is_potok[ctx.message.guild.id] is True:
-            embed = discord.Embed(title='Недоступно во время потока(', colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                           random.randrange(0, 255),
-                                                                                           random.randrange(0, 255)))
-            mes = await ctx.reply(embed=embed, mention_author=False)
-            await mes.add_reaction('❌')
-            return
+        if ctx.message.guild.id in is_potok:
+            if is_potok[ctx.message.guild.id] is True:
+                embed = discord.Embed(title='Недоступно во время потока(',
+                                      colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                    random.randrange(0, 255),
+                                                                    random.randrange(0, 255)))
+                mes = await ctx.reply(embed=embed, mention_author=False)
+                await mes.add_reaction('❌')
+                return
         id = ctx.message.guild.id
         if id in queues and (vc.is_playing() or vc.is_paused()):
             q = queues_n[ctx.message.guild.id]
-            embed = discord.Embed(title='Текущая очередь из песен:', colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+            embed = discord.Embed(title='Текущая очередь из песен:',
+                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)))
             embed.add_field(name='Играет прямо сейчас:', value=now[ctx.message.guild.id], inline=False)
             for i, e in enumerate(q):
                 embed.add_field(name=str(i + 1) + ' - ', value=e, inline=False)
@@ -897,8 +957,8 @@ class Speedwagon(commands.Cog):
             await mes.add_reaction('✅')
         else:
             embed = discord.Embed(title='Показывать нечего', colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                                           random.randrange(0, 255),
+                                                                                           random.randrange(0, 255)))
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('✅')
 
@@ -964,7 +1024,6 @@ class Speedwagon(commands.Cog):
             await ctx.reply('ALARM!ALARM! ВОЗНИКЛА ОШИБКА! ALARM!ALARM!', mention_author=False)
             return
 
-
     @commands.command(name='mem_h')
     async def mem_h(self, ctx):
         try:
@@ -973,8 +1032,8 @@ class Speedwagon(commands.Cog):
             embed = discord.Embed(title='Текущий "топ" мемов:',
                                   description=':white_check_mark: - подходит для создания мема\n :x: - не подходит',
                                   colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                random.randrange(0, 255),
+                                                                random.randrange(0, 255)))
             c = 1
             for i, e in enumerate(res['data']['memes']):
                 if (i + 1 >= n * 10) and (i + 1 <= n * 10 + 10):
@@ -1010,8 +1069,8 @@ class Speedwagon(commands.Cog):
                         12 - Цитаты (+18);
                         13 - Тосты (+18);
                         14 - Статусы (+18).""", colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                                       random.randrange(0, 255),
-                                                                                       random.randrange(0, 255)))
+                                                                              random.randrange(0, 255),
+                                                                              random.randrange(0, 255)))
             await ctx.reply(embed=embed, mention_author=False)
         except Exception:
             await ctx.reply('Команда rofl_h не сработала(((', mention_author=False)
@@ -1020,19 +1079,19 @@ class Speedwagon(commands.Cog):
     async def rofl(self, ctx):
         try:
             sl = {'1': '1',
-                '2': '2',
-                '3': '3',
-                '4': '4',
-                '5': '5',
-                '6': '6',
-                '7': '8',
-                '8': '11',
-                '9': '12',
-                '10': '13',
-                '11': '14',
-                '12': '15',
-                '13': '16',
-                '14': '18',}
+                  '2': '2',
+                  '3': '3',
+                  '4': '4',
+                  '5': '5',
+                  '6': '6',
+                  '7': '8',
+                  '8': '11',
+                  '9': '12',
+                  '10': '13',
+                  '11': '14',
+                  '12': '15',
+                  '13': '16',
+                  '14': '18', }
             n = ctx.message.content.split('-rofl ')[-1].strip()
             n = sl[n]
             res = requests.get(f'http://rzhunemogu.ru/RandJSON.aspx?CType={n}').text
