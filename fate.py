@@ -165,14 +165,14 @@ def obrabotka_c_z(message):
                                   ['', '', ''],
                                   ['', '', '']]:
                 c_z_matrix[id][0][0] = 'x'
-            elif c_z_matrix[id][2][0] == 'x' and c_z_matrix[id][0][1] == 'o' and c_z_matrix[id][1][0] == 'o' and not c_z_matrix[id][2][2]:
+            elif (c_z_matrix[id][2][0] == 'x' or c_z_matrix[id][0][2] == 'x') and c_z_matrix[id][0][1] == 'o' and c_z_matrix[id][1][0] == 'o' and not c_z_matrix[id][2][2]:
                 c_z_matrix[id][2][2] = 'x'
             elif c_z_matrix[id][2][0] == 'x' and c_z_matrix[id][1][0] == 'o' and c_z_matrix[id][2][1] == 'o' and not c_z_matrix[id][0][2]:
                 c_z_matrix[id][0][2] = 'x'
-            elif (c_z_matrix[id][1][0] == 'o' or c_z_matrix[id][1][2] == 'o' or c_z_matrix[id][2][2] == 'o') and not c_z_matrix[id][0][2]:
-                c_z_matrix[id][0][2] = 'x'
             elif (c_z_matrix[id][0][1] == 'o' or c_z_matrix[id][2][1] == 'o' or c_z_matrix[id][2][2] == 'o') and not c_z_matrix[id][2][0]:
                 c_z_matrix[id][2][0] = 'x'
+            elif (c_z_matrix[id][1][0] == 'o' or c_z_matrix[id][1][2] == 'o' or c_z_matrix[id][2][2] == 'o') and not c_z_matrix[id][0][2]:
+                c_z_matrix[id][0][2] = 'x'
             elif not c_z_matrix[id][2][2] and (c_z_matrix[id][0][2] == 'o' or c_z_matrix[id][2][0] == 'o' or c_z_matrix[id][1][1] == 'o'):
                 c_z_matrix[id][2][2] = 'x'
         else:
