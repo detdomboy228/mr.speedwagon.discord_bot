@@ -458,6 +458,7 @@ async def on_message(message):
         c_z_matrix[id] = [['', '', ''],
                           ['', '', ''],
                           ['', '', '']]
+        storona[id] = ''
     # вот тут СГЛЫПА
     db_sess = db_session.create_session()
     if message.content[0] != '-':
@@ -509,13 +510,9 @@ class Speedwagon(commands.Cog):
     async def cross_zero(self, ctx):
         global c_z_matrix, flag_c_z, storona, player
         id = ctx.message.guild.id
-        player[id] = ctx.message.author.id
-        c_z_matrix[id] = [['', '', ''],
-                          ['', '', ''],
-                          ['', '', '']]
-        storona[id] = ''
         if not flag_c_z[id]:
             flag_c_z[id] = True
+            player[id] = ctx.message.author.id
             storona[id] = random.choice(['x', 'o'])
             await ctx.send(
                 f'Игра запущена. Для игры пишите просто цифры от 1 до 9. Вы играете за: "{storona[id]}". Крестики ходят первые')
