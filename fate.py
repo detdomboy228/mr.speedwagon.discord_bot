@@ -229,9 +229,9 @@ def check_c_z(message):
         return 'x'
     elif c_z_matrix[id][0][0] == c_z_matrix[id][1][1] == c_z_matrix[id][2][2] == 'o':
         return 'o'
-    if c_z_matrix[id][0][2] == c_z_matrix[id][1][2] == c_z_matrix[id][2][0] == 'x':
+    if c_z_matrix[id][0][2] == c_z_matrix[id][1][1] == c_z_matrix[id][2][0] == 'x':
         return 'x'
-    elif c_z_matrix[id][0][2] == c_z_matrix[id][1][2] == c_z_matrix[id][2][0] == 'o':
+    elif c_z_matrix[id][0][2] == c_z_matrix[id][1][1] == c_z_matrix[id][2][0] == 'o':
         return 'o'
     if '' not in c_z_matrix[id][0] and '' not in c_z_matrix[id][1] and '' not in c_z_matrix[id][2]:
         return 'n'
