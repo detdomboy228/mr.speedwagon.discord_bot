@@ -509,7 +509,6 @@ class Speedwagon(commands.Cog):
     async def cross_zero(self, ctx):
         global c_z_matrix, flag_c_z, storona, player
         id = ctx.message.guild.id
-        flag_c_z[id] = False
         player[id] = ctx.message.author.id
         c_z_matrix[id] = [['', '', ''],
                           ['', '', ''],
