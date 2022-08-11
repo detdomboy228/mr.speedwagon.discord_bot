@@ -77,27 +77,27 @@ prev_n = {}
 is_potok = {}
 str_pr = {}
 ffmpeg, ffprobe = run.get_or_fetch_platform_executables_else_raise()
-c_z_matrix = [['', '', ''],
-              ['', '', ''],
-              ['', '', '']]
-flag_c_z = False
-storona = ''
+c_z_matrix = {}
+flag_c_z = {}
+storona = {}
+player = {}
 
 
-def obrabotka_c_z():
+def obrabotka_c_z(message):
     global c_z_matrix, flag_c_z, storona
     egor_loh = ['x', 'o']
-    a = egor_loh[egor_loh.index(storona) - 1]
-    b = storona
-    if flag_c_z:
-        for elem in c_z_matrix:
+    id = message.guild.id
+    a = egor_loh[egor_loh.index(storona[id]) - 1]
+    b = storona[id]
+    if flag_c_z[id]:
+        for elem in c_z_matrix[id]:
             if '' in elem:
                 if elem.count(a) == 2:
                     for el in elem:
                         if not el:
                             elem[elem.index(el)] = a
                             return
-        for elem in c_z_matrix:
+        for elem in c_z_matrix[id]:
             if '' in elem:
                 if elem.count(b) == 2:
                     for el in elem:
@@ -105,134 +105,135 @@ def obrabotka_c_z():
                             elem[elem.index(el)] = a
                             return
         for i in range(3):
-            if '' in [c_z_matrix[0][i], c_z_matrix[1][i], c_z_matrix[2][i]]:
-                if [c_z_matrix[0][i], c_z_matrix[1][i], c_z_matrix[2][i]].count('x') == 2:
-                    if c_z_matrix[0][i] == '':
-                        c_z_matrix[0][i] = a
-                    elif c_z_matrix[1][i] == '':
-                        c_z_matrix[1][i] = a
-                    elif c_z_matrix[2][i] == '':
-                        c_z_matrix[2][i] = a
+            if '' in [c_z_matrix[id][0][i], c_z_matrix[id][1][i], c_z_matrix[id][2][i]]:
+                if [c_z_matrix[id][0][i], c_z_matrix[id][1][i], c_z_matrix[id][2][i]].count('x') == 2:
+                    if c_z_matrix[id][0][i] == '':
+                        c_z_matrix[id][0][i] = a
+                    elif c_z_matrix[id][1][i] == '':
+                        c_z_matrix[id][1][i] = a
+                    elif c_z_matrix[id][2][i] == '':
+                        c_z_matrix[id][2][i] = a
                     return
         for i in range(3):
-            if '' in [c_z_matrix[0][i], c_z_matrix[1][i], c_z_matrix[2][i]]:
-                if [c_z_matrix[0][i], c_z_matrix[1][i], c_z_matrix[2][i]].count(b) == 2:
-                    if c_z_matrix[0][i] == '':
-                        c_z_matrix[0][i] = a
-                    elif c_z_matrix[1][i] == '':
-                        c_z_matrix[1][i] = a
-                    elif c_z_matrix[2][i] == '':
-                        c_z_matrix[2][i] = a
+            if '' in [c_z_matrix[id][0][i], c_z_matrix[id][1][i], c_z_matrix[id][2][i]]:
+                if [c_z_matrix[id][0][i], c_z_matrix[id][1][i], c_z_matrix[id][2][i]].count(b) == 2:
+                    if c_z_matrix[id][0][i] == '':
+                        c_z_matrix[id][0][i] = a
+                    elif c_z_matrix[id][1][i] == '':
+                        c_z_matrix[id][1][i] = a
+                    elif c_z_matrix[id][2][i] == '':
+                        c_z_matrix[id][2][i] = a
                     return
-        if '' in [c_z_matrix[0][0], c_z_matrix[1][1], c_z_matrix[2][2]]:
-            if [c_z_matrix[0][0], c_z_matrix[1][1], c_z_matrix[2][2]].count(a) == 2:
-                if c_z_matrix[0][0] == '':
-                    c_z_matrix[0][0] = a
-                elif c_z_matrix[1][1] == '':
-                    c_z_matrix[1][1] = a
-                elif c_z_matrix[2][2] == '':
-                    c_z_matrix[2][2] = a
+        if '' in [c_z_matrix[id][0][0], c_z_matrix[id][1][1], c_z_matrix[id][2][2]]:
+            if [c_z_matrix[id][0][0], c_z_matrix[id][1][1], c_z_matrix[id][2][2]].count(a) == 2:
+                if c_z_matrix[id][0][0] == '':
+                    c_z_matrix[id][0][0] = a
+                elif c_z_matrix[id][1][1] == '':
+                    c_z_matrix[id][1][1] = a
+                elif c_z_matrix[id][2][2] == '':
+                    c_z_matrix[id][2][2] = a
                 return
-        if '' in [c_z_matrix[0][0], c_z_matrix[1][1], c_z_matrix[2][2]]:
-            if [c_z_matrix[0][0], c_z_matrix[1][1], c_z_matrix[2][2]].count(b) == 2:
-                if c_z_matrix[0][0] == '':
-                    c_z_matrix[0][0] = a
-                elif c_z_matrix[1][1] == '':
-                    c_z_matrix[1][1] = a
-                elif c_z_matrix[2][2] == '':
-                    c_z_matrix[2][2] = a
+        if '' in [c_z_matrix[id][0][0], c_z_matrix[id][1][1], c_z_matrix[id][2][2]]:
+            if [c_z_matrix[id][0][0], c_z_matrix[id][1][1], c_z_matrix[id][2][2]].count(b) == 2:
+                if c_z_matrix[id][0][0] == '':
+                    c_z_matrix[id][0][0] = a
+                elif c_z_matrix[id][1][1] == '':
+                    c_z_matrix[id][1][1] = a
+                elif c_z_matrix[id][2][2] == '':
+                    c_z_matrix[id][2][2] = a
                 return
-        if '' in [c_z_matrix[0][2], c_z_matrix[1][1], c_z_matrix[2][0]]:
-            if [c_z_matrix[0][2], c_z_matrix[1][1], c_z_matrix[2][0]].count(a) == 2:
-                if c_z_matrix[0][2] == '':
-                    c_z_matrix[0][2] = a
-                elif c_z_matrix[1][1] == '':
-                    c_z_matrix[1][1] = a
-                elif c_z_matrix[2][0] == '':
-                    c_z_matrix[2][0] = a
+        if '' in [c_z_matrix[id][0][2], c_z_matrix[id][1][1], c_z_matrix[id][2][0]]:
+            if [c_z_matrix[id][0][2], c_z_matrix[id][1][1], c_z_matrix[id][2][0]].count(a) == 2:
+                if c_z_matrix[id][0][2] == '':
+                    c_z_matrix[id][0][2] = a
+                elif c_z_matrix[id][1][1] == '':
+                    c_z_matrix[id][1][1] = a
+                elif c_z_matrix[id][2][0] == '':
+                    c_z_matrix[id][2][0] = a
                 return
-        if '' in [c_z_matrix[0][2], c_z_matrix[1][1], c_z_matrix[2][0]]:
-            if [c_z_matrix[0][2], c_z_matrix[1][1], c_z_matrix[2][0]].count(b) == 2:
-                if c_z_matrix[0][2] == '':
-                    c_z_matrix[0][2] = a
-                elif c_z_matrix[1][1] == '':
-                    c_z_matrix[1][1] = a
-                elif c_z_matrix[2][0] == '':
-                    c_z_matrix[2][0] = a
+        if '' in [c_z_matrix[id][0][2], c_z_matrix[id][1][1], c_z_matrix[id][2][0]]:
+            if [c_z_matrix[id][0][2], c_z_matrix[id][1][1], c_z_matrix[id][2][0]].count(b) == 2:
+                if c_z_matrix[id][0][2] == '':
+                    c_z_matrix[id][0][2] = a
+                elif c_z_matrix[id][1][1] == '':
+                    c_z_matrix[id][1][1] = a
+                elif c_z_matrix[id][2][0] == '':
+                    c_z_matrix[id][2][0] = a
                 return
-        if storona == 'o':
-            if c_z_matrix == [['', '', ''],
-                              ['', '', ''],
-                              ['', '', '']]:
-                c_z_matrix[0][0] = 'x'
-            elif c_z_matrix[2][0] == 'x' and c_z_matrix[0][1] == 'o' and c_z_matrix[1][0] == 'o' and not c_z_matrix[2][2]:
-                c_z_matrix[2][2] = 'x'
-            elif c_z_matrix[2][0] == 'x' and c_z_matrix[1][0] == 'o' and c_z_matrix[2][1] == 'o' and not c_z_matrix[0][2]:
-                c_z_matrix[0][2] = 'x'
-            elif (c_z_matrix[0][1] == 'o' or c_z_matrix[2][1] == 'o' or c_z_matrix[2][2] == 'o') and not c_z_matrix[2][0]:
-                c_z_matrix[2][0] = 'x'
-            elif (c_z_matrix[1][0] == 'o' or c_z_matrix[1][2] == 'o' or c_z_matrix[2][2] == 'o') and not c_z_matrix[0][2]:
-                c_z_matrix[0][2] = 'x'
-            elif not c_z_matrix[2][2] and (c_z_matrix[0][2] == 'o' or c_z_matrix[2][0] == 'o' or c_z_matrix[1][1] == 'o'):
-                c_z_matrix[2][2] = 'x'
+        if storona[id] == 'o':
+            if c_z_matrix[id] == [['', '', ''],
+                                  ['', '', ''],
+                                  ['', '', '']]:
+                c_z_matrix[id][0][0] = 'x'
+            elif c_z_matrix[id][2][0] == 'x' and c_z_matrix[id][0][1] == 'o' and c_z_matrix[id][1][0] == 'o' and not c_z_matrix[id][2][2]:
+                c_z_matrix[id][2][2] = 'x'
+            elif c_z_matrix[id][2][0] == 'x' and c_z_matrix[id][1][0] == 'o' and c_z_matrix[id][2][1] == 'o' and not c_z_matrix[id][0][2]:
+                c_z_matrix[id][0][2] = 'x'
+            elif (c_z_matrix[id][0][1] == 'o' or c_z_matrix[id][2][1] == 'o' or c_z_matrix[id][2][2] == 'o') and not c_z_matrix[id][2][0]:
+                c_z_matrix[id][2][0] = 'x'
+            elif (c_z_matrix[id][1][0] == 'o' or c_z_matrix[id][1][2] == 'o' or c_z_matrix[id][2][2] == 'o') and not c_z_matrix[id][0][2]:
+                c_z_matrix[id][0][2] = 'x'
+            elif not c_z_matrix[id][2][2] and (c_z_matrix[id][0][2] == 'o' or c_z_matrix[id][2][0] == 'o' or c_z_matrix[id][1][1] == 'o'):
+                c_z_matrix[id][2][2] = 'x'
         else:
-            if c_z_matrix[0].count('x') + c_z_matrix[1].count('x') + c_z_matrix[2].count('x') == 1:
-                if c_z_matrix[1][1] == 'x':
-                    c_z_matrix[0][0] = 'o'
+            if c_z_matrix[id][0].count('x') + c_z_matrix[id][1].count('x') + c_z_matrix[id][2].count('x') == 1:
+                if c_z_matrix[id][1][1] == 'x':
+                    c_z_matrix[id][0][0] = 'o'
                 else:
-                    c_z_matrix[1][1] = 'o'
-            elif c_z_matrix[0].count('x') + c_z_matrix[1].count('x') + c_z_matrix[2].count('x') == 2:
-                if c_z_matrix[0][0] == 'x' or c_z_matrix[0][2] == 'x' or c_z_matrix[2][0] == 'x' or c_z_matrix[2][2] == 'x':
-                    if (c_z_matrix[0][0] == 'x' and c_z_matrix[2][2] == 'x') or (c_z_matrix[0][2] == 'x' and c_z_matrix[2][0]):
-                        c_z_matrix[0][1] = 'o'
-            elif c_z_matrix[0].count('x') + c_z_matrix[1].count('x') + c_z_matrix[2].count('x') == 3:
-                if (c_z_matrix[0][0] == 'x' and c_z_matrix[2][0] == 'x' and c_z_matrix[1][2] == 'x') or \
-                        (c_z_matrix[0][2] == 'x' and c_z_matrix[2][2] == 'x' and c_z_matrix[1][0] == 'x') or \
-                        (c_z_matrix[0][0] == 'x' and c_z_matrix[0][2] == 'x' and c_z_matrix[2][1] == 'x') or \
-                        (c_z_matrix[2][0] == 'x' and c_z_matrix[2][2] == 'x' and c_z_matrix[0][1] == 'x'):
-                    if not c_z_matrix[0][1]:
-                        c_z_matrix[0][1] = 'o'
-                    elif not c_z_matrix[1][0]:
-                        c_z_matrix[1][0] = 'o'
-                    elif not c_z_matrix[1][2]:
-                        c_z_matrix[1][2] = 'o'
+                    c_z_matrix[id][1][1] = 'o'
+            elif c_z_matrix[id][0].count('x') + c_z_matrix[id][1].count('x') + c_z_matrix[id][2].count('x') == 2:
+                if c_z_matrix[id][0][0] == 'x' or c_z_matrix[id][0][2] == 'x' or c_z_matrix[id][2][0] == 'x' or c_z_matrix[id][2][2] == 'x':
+                    if (c_z_matrix[id][0][0] == 'x' and c_z_matrix[id][2][2] == 'x') or (c_z_matrix[id][0][2] == 'x' and c_z_matrix[id][2][0]):
+                        c_z_matrix[id][0][1] = 'o'
+            elif c_z_matrix[id][0].count('x') + c_z_matrix[id][1].count('x') + c_z_matrix[id][2].count('x') == 3:
+                if (c_z_matrix[id][0][0] == 'x' and c_z_matrix[id][2][0] == 'x' and c_z_matrix[id][1][2] == 'x') or \
+                        (c_z_matrix[id][0][2] == 'x' and c_z_matrix[id][2][2] == 'x' and c_z_matrix[id][1][0] == 'x') or \
+                        (c_z_matrix[id][0][0] == 'x' and c_z_matrix[id][0][2] == 'x' and c_z_matrix[id][2][1] == 'x') or \
+                        (c_z_matrix[id][2][0] == 'x' and c_z_matrix[id][2][2] == 'x' and c_z_matrix[id][0][1] == 'x'):
+                    if not c_z_matrix[id][0][1]:
+                        c_z_matrix[id][0][1] = 'o'
+                    elif not c_z_matrix[id][1][0]:
+                        c_z_matrix[id][1][0] = 'o'
+                    elif not c_z_matrix[id][1][2]:
+                        c_z_matrix[id][1][2] = 'o'
                     else:
-                        c_z_matrix[2][1] = 'o'
-            if c_z_matrix[0].count('x') + c_z_matrix[1].count('x') + c_z_matrix[2].count('x') > \
-                    c_z_matrix[0].count('o') + c_z_matrix[1].count('o') + c_z_matrix[2].count('o'):
+                        c_z_matrix[id][2][1] = 'o'
+            if c_z_matrix[id][0].count('x') + c_z_matrix[id][1].count('x') + c_z_matrix[id][2].count('x') > \
+                    c_z_matrix[id][0].count('o') + c_z_matrix[id][1].count('o') + c_z_matrix[id][2].count('o'):
                 free_list = []
                 for i in range(3):
                     for j in range(3):
-                        if c_z_matrix[i][j] == '':
+                        if c_z_matrix[id][i][j] == '':
                             free_list.append((i, j))
                 if free_list:
                     a = random.choice(free_list)
-                    c_z_matrix[a[0]][a[1]] = 'o'
+                    c_z_matrix[id][a[0]][a[1]] = 'o'
                 else:
                     pass
 
 
-def check_c_z():
+def check_c_z(message):
     global c_z_matrix
-    for elem in c_z_matrix:
+    id = message.guild.id
+    for elem in c_z_matrix[id]:
         if elem.count('o') == 3:
             return 'o'
         elif elem.count('x') == 3:
             return 'x'
-    for i in range(len(c_z_matrix)):
-        if c_z_matrix[0][i] == c_z_matrix[1][i] == c_z_matrix[2][i] == 'x':
+    for i in range(len(c_z_matrix[id])):
+        if c_z_matrix[id][0][i] == c_z_matrix[id][1][i] == c_z_matrix[id][2][i] == 'x':
             return 'x'
-        elif c_z_matrix[0][i] == c_z_matrix[1][i] == c_z_matrix[2][i] == 'o':
+        elif c_z_matrix[id][0][i] == c_z_matrix[id][1][i] == c_z_matrix[id][2][i] == 'o':
             return 'o'
-    if c_z_matrix[0][0] == c_z_matrix[1][1] == c_z_matrix[2][2] == 'x':
+    if c_z_matrix[id][0][0] == c_z_matrix[id][1][1] == c_z_matrix[id][2][2] == 'x':
         return 'x'
-    elif c_z_matrix[0][0] == c_z_matrix[1][1] == c_z_matrix[2][2] == 'o':
+    elif c_z_matrix[id][0][0] == c_z_matrix[id][1][1] == c_z_matrix[id][2][2] == 'o':
         return 'o'
-    if c_z_matrix[0][2] == c_z_matrix[1][2] == c_z_matrix[2][0] == 'x':
+    if c_z_matrix[id][0][2] == c_z_matrix[id][1][2] == c_z_matrix[id][2][0] == 'x':
         return 'x'
-    elif c_z_matrix[0][2] == c_z_matrix[1][2] == c_z_matrix[2][0] == 'o':
+    elif c_z_matrix[id][0][2] == c_z_matrix[id][1][2] == c_z_matrix[id][2][0] == 'o':
         return 'o'
-    if '' not in c_z_matrix[0] and '' not in c_z_matrix[1] and '' not in c_z_matrix[2]:
+    if '' not in c_z_matrix[id][0] and '' not in c_z_matrix[id][1] and '' not in c_z_matrix[id][2]:
         return 'n'
     return None
 
@@ -390,6 +391,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     global cur, db, flag_c_z, c_z_matrix
+    id = message.guild.id
     if message.author == bot.user:
         return
     elif ('пошел отсюда' in message.content.lower() or 'пошёл отсюда' in message.content.lower()) and \
@@ -406,53 +408,56 @@ async def on_message(message):
         r = requests.get('https://dog.ceo/api/breeds/image/random').json()['message']
         await message.channel.send(r)
     #################################
-    elif message.content in [str(x) for x in range(1, 10)] and flag_c_z:
-        if not c_z_matrix[(int(message.content) - 1) // 3][(int(message.content) - 1) % 3]:
-            c_z_matrix[(int(message.content) - 1) // 3][(int(message.content) - 1) % 3] = storona
-            embed = discord.Embed(title='Крестики-нолики',
-                                  description=f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[0])))}\n" + \
-                                              f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[1])))}\n" + \
-                                              f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[2])))}\n",
-                                  colour=discord.Color.from_rgb(random.randrange(0, 255),
-                                                                random.randrange(0, 255),
-                                                                random.randrange(0, 255)))
-            await message.channel.send(embed=embed, mention_author=False)
-            if check_c_z() == storona:
-                flag_c_z = False
-                await message.channel.send('Я ПРОИГРАЛ, ТАКОГО БЫТЬ НЕ МОЖЕТ!!!!!!!!')
-            elif check_c_z() and check_c_z() != 'n':
-                flag_c_z = False
-                await message.channel.send('ХАХАХА, я победил, неуидивительно, с таким затупком играть')
-            elif check_c_z() == 'n':
-                flag_c_z = False
-                await message.channel.send('Ничья, ну такое бывает, достойно играешь!!!')
-            if flag_c_z:
-                obrabotka_c_z()
+    elif message.content in [str(x) for x in range(1, 10)] and flag_c_z[id]:
+        if message.author.id == player[id]:
+            if not c_z_matrix[id][(int(message.content) - 1) // 3][(int(message.content) - 1) % 3]:
+                c_z_matrix[id][(int(message.content) - 1) // 3][(int(message.content) - 1) % 3] = storona[id]
                 embed = discord.Embed(title='Крестики-нолики',
-                                      description=f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[0])))}\n" + \
-                                                  f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[1])))}\n" + \
-                                                  f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[2])))}\n",
+                                      description=f"{' '.join(list(map(lambda x: x.replace('', '- ') if not x else x, c_z_matrix[id][0])))}\n" + \
+                                                  f"{' '.join(list(map(lambda x: x.replace('', '- ') if not x else x, c_z_matrix[id][1])))}\n" + \
+                                                  f"{' '.join(list(map(lambda x: x.replace('', '- ') if not x else x, c_z_matrix[id][2])))}\n",
                                       colour=discord.Color.from_rgb(random.randrange(0, 255),
                                                                     random.randrange(0, 255),
                                                                     random.randrange(0, 255)))
                 await message.channel.send(embed=embed, mention_author=False)
-                if check_c_z() == storona:
-                    flag_c_z = False
+                if check_c_z(message) == storona[id]:
+                    flag_c_z[id] = False
                     await message.channel.send('Я ПРОИГРАЛ, ТАКОГО БЫТЬ НЕ МОЖЕТ!!!!!!!!')
-                elif check_c_z() and check_c_z() != 'n':
-                    flag_c_z = False
+                elif check_c_z(message) and check_c_z(message) != 'n':
+                    flag_c_z[id] = False
                     await message.channel.send('ХАХАХА, я победил, неуидивительно, с таким затупком играть')
-                elif check_c_z() == 'n':
-                    flag_c_z = False
+                elif check_c_z(message) == 'n':
+                    flag_c_z[id] = False
                     await message.channel.send('Ничья, ну такое бывает, достойно играешь!!!')
-        else:
-            await message.channel.send('Ты чего аферист? Эта клетка занята')
+                if flag_c_z[id]:
+                    obrabotka_c_z(message)
+                    embed = discord.Embed(title='Крестики-нолики',
+                                          description=f"{' '.join(list(map(lambda x: x.replace('', '- ') if not x else x, c_z_matrix[id][0])))}\n" + \
+                                                      f"{' '.join(list(map(lambda x: x.replace('', '- ') if not x else x, c_z_matrix[id][1])))}\n" + \
+                                                      f"{' '.join(list(map(lambda x: x.replace('', '- ') if not x else x, c_z_matrix[id][2])))}\n",
+                                          colour=discord.Color.from_rgb(random.randrange(0, 255),
+                                                                        random.randrange(0, 255),
+                                                                        random.randrange(0, 255)))
+                    await message.channel.send(embed=embed, mention_author=False)
+                    if check_c_z(message) == storona[id]:
+                        flag_c_z[id] = False
+                        await message.channel.send('Я ПРОИГРАЛ, ТАКОГО БЫТЬ НЕ МОЖЕТ!!!!!!!!')
+                    elif check_c_z(message) and check_c_z(message) != 'n':
+                        flag_c_z[id] = False
+                        await message.channel.send('ХАХАХА, я победил, неуидивительно, с таким затупком играть')
+                    elif check_c_z(message) == 'n':
+                        flag_c_z[id] = False
+                        await message.channel.send('Ничья, ну такое бывает, достойно играешь!!!')
+            else:
+                await message.channel.send('Ты чего аферист? Эта клетка занята')
     else:
         pass
-    if not flag_c_z:
-        c_z_matrix = [['', '', ''],
-                      ['', '', ''],
-                      ['', '', '']]
+    if id not in flag_c_z:
+        flag_c_z[id] = False
+    if not flag_c_z[id]:
+        c_z_matrix[id] = [['', '', ''],
+                          ['', '', ''],
+                          ['', '', '']]
     # вот тут СГЛЫПА
     db_sess = db_session.create_session()
     if message.content[0] != '-':
@@ -502,18 +507,25 @@ class Speedwagon(commands.Cog):
 
     @commands.command(name='cross_zero', aliases=['c_z', 'cz', 'ttt', 'tic-tac-toe'])
     async def cross_zero(self, ctx):
-        global c_z_matrix, flag_c_z, storona
-        if not flag_c_z:
-            flag_c_z = True
-            storona = random.choice(['x', 'o'])
+        global c_z_matrix, flag_c_z, storona, player
+        id = ctx.message.guild.id
+        flag_c_z[id] = False
+        player[id] = ctx.message.author.id
+        c_z_matrix[id] = [['', '', ''],
+                          ['', '', ''],
+                          ['', '', '']]
+        storona[id] = ''
+        if not flag_c_z[id]:
+            flag_c_z[id] = True
+            storona[id] = random.choice(['x', 'o'])
             await ctx.send(
-                f'Игра запущена. Для игры пишите просто цифры от 1 до 9. Вы играете за: "{storona}". Крестики ходят первые')
-            if storona == 'o':
-                obrabotka_c_z()
+                f'Игра запущена. Для игры пишите просто цифры от 1 до 9. Вы играете за: "{storona[id]}". Крестики ходят первые')
+            if storona[id] == 'o':
+                obrabotka_c_z(ctx)
             embed = discord.Embed(title='Крестики-нолики',
-                                  description=f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[0])))}\n" + \
-                                              f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[1])))}\n" + \
-                                              f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[2])))}\n",
+                                  description=f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[id][0])))}\n" + \
+                                              f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[id][1])))}\n" + \
+                                              f"{' '.join(list(map(lambda x: x.replace('', '-') if not x else x, c_z_matrix[id][2])))}\n",
                                   colour=discord.Color.from_rgb(random.randrange(0, 255),
                                                                 random.randrange(0, 255),
                                                                 random.randrange(0, 255)))
