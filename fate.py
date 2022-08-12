@@ -363,7 +363,7 @@ async def send_message_to_channel(ctx, sss):
                           url=sss['webpage_url'],
                           description=sss['title'])
     embed.set_author(name=sss['uploader'])
-    embed.set_thumbnail(url=sss['thumbnails'][0]['url'])
+    embed.set_thumbnail(url=sss['thumbnails'][-1]['url'])
     if int(sss['duration']) > 60:
         m = int(sss['duration']) // 60
         s = int(sss['duration']) - int(sss['duration']) // 60 * 60
@@ -371,13 +371,13 @@ async def send_message_to_channel(ctx, sss):
             ch = m // 60
             ost_m = m - ch * 60
             embed.add_field(name="Длительность: ",
-                            value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
+                            value='`' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.`')
         else:
             embed.add_field(name="Длительность: ",
-                            value=str(m) + ' м. ' + str(s) + ' c.')
+                            value='`' + str(m) + ' м. ' + str(s) + ' c.`')
     else:
         embed.add_field(name="Длительность: ",
-                        value=str(sss['duration']) + ' c.')
+                        value='`' + str(sss['duration']) + ' c.`')
     mes = await ctx.send(embed=embed)
     await mes.add_reaction('✅')
 
@@ -556,7 +556,8 @@ class Speedwagon(commands.Cog):
                                   url=sss['webpage_url'])
             embed.set_author(name=sss['uploader'])
             embed.set_thumbnail(url=sss['thumbnails'][-1]['url'])
-            embed.add_field(name='Длительность:', value=now[ctx.message.guild.id].split(' --- ')[-1], inline=False)
+            embed.add_field(name='Длительность:', value='`' + now[ctx.message.guild.id].split(' --- ')[-1] + '`',
+                            inline=False)
             await ctx.reply(embed=embed, mention_author=False)
         except Exception:
             await ctx.reply('Видимо, сейчас ничего не играет(', mention_author=False)
