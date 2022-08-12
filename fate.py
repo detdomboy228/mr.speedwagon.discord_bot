@@ -401,6 +401,9 @@ async def on_message(message):
     elif ('пошел отсюда' in message.content.lower() or 'пошёл отсюда' in message.content.lower()) and \
             'бот' in message.content.lower():
         await message.channel.send('слушаюсь, мой господин')
+    elif ('бот го секс' in message.content.lower() or 'бот, го секс' in message.content.lower()) and \
+            'бот' in message.content.lower():
+        await message.channel.send('Го)))) Чур я сверху')
     elif 'джозеф худший джоджо' in message.content.lower():
         await message.channel.send('полностью согласен!!!\nсамый крутой Джотаро')
     #################################
