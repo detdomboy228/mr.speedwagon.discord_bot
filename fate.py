@@ -281,8 +281,8 @@ def check_potok(ctx, url, info, id):
         str_pr[id].append(info['title'])
     vc = ctx.guild.voice_client
     source = easy_convert(info['title'])[0]
-    html = urllib.request.urlopen(url).split('Похожий контент')[-1]
-    video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+    html = urllib.request.urlopen(url).read().decode().split('Похожий контент')[-1]
+    video_ids = re.findall(r"watch\?v=(\S{11})", html)
     spis = []
     for e in video_ids:
         if e not in spis:
