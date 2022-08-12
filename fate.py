@@ -281,12 +281,14 @@ def check_potok(ctx, url, info, id):
         str_pr[id].append(info['title'])
     vc = ctx.guild.voice_client
     source = easy_convert(info['title'])[0]
-    html = urllib.request.urlopen(url).read().decode().split('Похожий контент')[-1]
-    video_ids = re.findall(r"watch\?v=(\S{11})", html)
+    html = urllib.request.urlopen(url).read().decode()
+    abc = html.split('Текущее видео')[-1]
+    video_ids = re.findall(r"watch\?v=(\S{11})", abc)
     spis = []
     for e in video_ids:
         if e not in spis:
             spis.append(e)
+    aboba = ''
     for e in spis:
         try:
             name = easy_convert("https://www.youtube.com/watch?v=" + e)[-1]['title']
@@ -300,6 +302,8 @@ def check_potok(ctx, url, info, id):
             if counter * 100 / len(name.split()) < 65:
                 aboba = ("https://www.youtube.com/watch?v=" + e)
                 break
+    if not aboba:
+        aboba = ("https://www.youtube.com/watch?v=" + spis[0])
     now[id] = info['title'] + ' --- '
     if int(info['duration']) > 60:
         m = int(info['duration']) // 60
