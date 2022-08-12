@@ -185,6 +185,8 @@ def obrabotka_c_z(message):
                 if c_z_matrix[id][0][0] == 'x' or c_z_matrix[id][0][2] == 'x' or c_z_matrix[id][2][0] == 'x' or c_z_matrix[id][2][2] == 'x':
                     if (c_z_matrix[id][0][0] == 'x' and c_z_matrix[id][2][2] == 'x') or (c_z_matrix[id][0][2] == 'x' and c_z_matrix[id][2][0]):
                         c_z_matrix[id][0][1] = 'o'
+                    elif c_z_matrix[id][1][1] == 'x' and c_z_matrix[id][2][2] == 'x' and not c_z_matrix[id][0][2]:
+                        c_z_matrix[id][0][2] = 'o'
             elif c_z_matrix[id][0].count('x') + c_z_matrix[id][1].count('x') + c_z_matrix[id][2].count('x') == 3:
                 if (c_z_matrix[id][0][0] == 'x' and c_z_matrix[id][2][0] == 'x' and c_z_matrix[id][1][2] == 'x') or \
                         (c_z_matrix[id][0][2] == 'x' and c_z_matrix[id][2][2] == 'x' and c_z_matrix[id][1][0] == 'x') or \
