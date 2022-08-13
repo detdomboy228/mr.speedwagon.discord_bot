@@ -408,6 +408,16 @@ async def on_message(message):
         await message.channel.send('Го)))) Чур я сверху')
     elif 'джозеф худший джоджо' in message.content.lower():
         await message.channel.send('полностью согласен!!!\nсамый крутой Джотаро')
+    elif ('бот, скинь' in message.content.lower() or 'бот скинь' in message.content.lower()) and\
+        len(set(message.content.lower().split()) & set(['хуй', 'член', 'пенис', 'бабиджон', 'биба', 'пэнис'])) >= 1:
+        html = requests.get('https://yandex.ru/images/search?from=tabbar&text=хуй').text
+        itog = re.findall(r'(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])',
+                          html)
+        sp = [e[0] + '://' + e[1] + e[2] for e in itog if
+              '.jpg' in e[2] or '.png' in e[2] or '.bmp' in e[2] or '.gif' in e[2]]
+        await message.channel.send(random.choice(["Это мой!!!", "Держи, сладкий", 'Блен, Максим, не стыдно???',
+                                   'Держи кукан', 'Ну как, нравится?']))
+        await message.channel.send(random.choice(sp[44:-17]))
     #################################
     elif 'кот' in message.content.lower() or 'кош' in message.content.lower():
         r = requests.get('https://api.thecatapi.com/v1/images/search').json()[0]['url']
