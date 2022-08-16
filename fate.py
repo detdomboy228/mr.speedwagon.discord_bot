@@ -23,6 +23,7 @@ from simpledemotivators import Demotivator, Quote
 import yandex_weather_api
 import logging
 import asyncio
+from transliterate import translit
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -615,10 +616,21 @@ class Speedwagon(commands.Cog):
 
     @commands.command()
     async def lyrics(self, ctx):
-        #try:
-            auth = easy_convert(now[ctx.message.guild.id])[-1]['uploader'].split(' - Topic')[0].split('VEVO')[0]
-            namev1 = now[ctx.message.guild.id].split(' --- ')[0]
+        try:
+            ish_au = easy_convert(now[ctx.message.guild.id])[-1]['uploader']
+            try:
+                ish_au = translit(ish_au, reversed=True).replace("'", '')
+            except Exception:
+                pass
+            ish_nm = now[ctx.message.guild.id].split(' --- ')[0]
+            try:
+                ish_nm = translit(ish_nm, reversed=True).replace("'", '')
+            except Exception:
+                pass
+            auth = ish_au.split(' - Topic')[0].split('VEVO')[0]
+            namev1 = ish_nm
             namev2 = namev1.split('(')[0].split('[')[0]
+            namev3 = ''.join([e for e in namev1 if e != '(' and e != ')' and e != '[' and e != ']'])
             sp = {}
             try:
                 a = lyricsprs(geturl(namev1))
@@ -648,19 +660,52 @@ class Speedwagon(commands.Cog):
                 sp[nm] = v4
             except Exception:
                 pass
+            try:
+                a = lyricsprs(geturl(namev3))
+                v5 = a[0]
+                nm = a[-1]
+                sp[nm] = v5
+            except Exception:
+                pass
+            try:
+                a = lyricsprs(geturl(auth + ' ' + namev3))
+                v6 = a[0]
+                nm = a[-1]
+                sp[nm] = v6
+            except Exception:
+                pass
             sps = {}
             for e in sp:
                 if e not in sps:
                     sps[e] = sp[e]
-            await ctx.reply('**Вот всё, что я нашёл. Выбирай сам, короче**', mention_author=False)
+            if len(sps) > 0:
+                await ctx.reply('**Вот всё, что я нашёл. Выбирай сам, короче**', mention_author=False)
+            else:
+                auth = ' '.join(((easy_convert(now[ctx.message.guild.id])[-1]['uploader']) + ' ').split())
+                name_full = auth + ' ' + ' '.join(now[ctx.message.guild.id].split(' --- ')[0].split())
+                html = urllib.request.urlopen(f'https://alloflyrics.cc/search/?s={quote(name_full)}').read()
+                url = 'https://alloflyrics.cc/song/' + str(html).split('/song/')[1].split('">')[0]
+                html = urllib.request.urlopen(url).read().decode('utf8')
+                soup = BeautifulSoup(html, 'lxml')
+                if soup.find_all('p')[0].get_text().split()[0] == 'Из':
+                    r = soup.find_all('p')[0].get_text() + '\n' + soup.find_all('p')[1].get_text()
+                else:
+                    r = soup.find_all('p')[0].get_text()
+                namus = soup.find('title')
+                with open("song_text.txt", "w") as file:
+                    file.write(r)
+                await ctx.reply('**Вот всё, что я нашёл. Выбирай сам, короче**', mention_author=False)
+                await ctx.send(namus.get_text())
+                await ctx.send(file=discord.File("song_text.txt"), mention_author=False)
+                os.remove('song_text.txt')
             for e in sps:
                 with open("song_text.txt", "w", encoding="utf-8") as file:
                     file.write(sps[e])
                 await ctx.send(e)
                 await ctx.send(file=discord.File("song_text.txt"))
                 os.remove('song_text.txt')
-        #except Exception:
-        #    await ctx.reply('Видимо, произошла ошибка( Текста нема.', mention_author=False)
+        except Exception:
+            await ctx.reply('Видимо, произошла ошибка( Текста нема.', mention_author=False)
 
     @commands.command(name='pause')
     async def pause(self, ctx):
@@ -1422,3 +1467,4 @@ if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
     bot.add_cog(Speedwagon(bot))
     bot.run(os.environ['TOKEN'])
+   
