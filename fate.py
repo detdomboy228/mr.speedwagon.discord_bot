@@ -4,8 +4,8 @@ from data.users import User
 import urllib.request
 from urllib.parse import quote
 import re
-from transliterate import translit
 from static_ffmpeg import run
+from bs4 import BeautifulSoup
 import wikipedia as wi
 import discord
 import pprint
@@ -13,7 +13,7 @@ from discord.ext import commands
 from discord import FFmpegPCMAudio, voice_client
 from discord.utils import get
 from youtube_dl import YoutubeDL
-from PIL import Image, ImageEnhance, ImageOps, ImageFilter
+from  PIL import Image, ImageEnhance, ImageOps, ImageFilter
 import os
 import json
 import requests
@@ -32,7 +32,7 @@ handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 client = discord.Client()
-bot = commands.Bot(command_prefix='-')
+bot = commands.Bot(command_prefix='--')
 YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'False', 'simulate': 'True',
                'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio',
                'logger': logger}
@@ -81,6 +81,35 @@ c_z_matrix = {}
 flag_c_z = {}
 storona = {}
 player = {}
+
+
+def lyricsprs(url):
+    res = requests.get(url)
+    sp = BeautifulSoup(res.text, 'lxml')
+    lrcs = sp.find('div', class_="Lyrics__Container-sc-1ynbvzw-6 YYrds")
+    name = sp.find('title')
+    a = lrcs.get_text('\n')
+    print(a)
+    return a, name.get_text()
+
+
+def geturl(name):
+    client_access_token = 'ctGDpRexTPVdfIwoeg47nUz_sFg2N9CmxRnoM_W-w4SecC2Mu0SPN3miHSSosRJ8'
+    base_url = 'https://api.genius.com'
+    user_input = name.replace(' ', '-')
+    path = 'search/'
+    request_url = '/'.join([base_url, path])
+    print(request_url + user_input)
+    params = {'q': user_input}
+    token = 'Bearer {}'.format(client_access_token)
+    headers = {'Authorization': token}
+    r = requests.get(request_url, params=params, headers=headers)
+    try:
+        a = r.json()['response']['hits'][0]['result']['url']
+    except Exception:
+        a = None
+    print(a)
+    return a
 
 
 def obrabotka_c_z(message):
@@ -404,13 +433,14 @@ async def on_message(message):
             'бот' in message.content.lower():
         await message.channel.send('слушаюсь, мой господин')
     elif ('бот го секс' in message.content.lower() or 'бот, го секс' in message.content.lower()) and \
-            'бот' in message.content.lower():
+             'бот' in message.content.lower():
         await message.channel.send(random.choice(['Го)))) Чур я сверху', 'Я не в настроении',
-                                                  'Башка болит, потом как-нибудь', 'Я центральный персонаж 1 части джоджо. Го', 'Нет']))
+                                                  'Башка болит, потом как-нибудь',
+                                                  'Я центральный персонаж 1 части джоджо. Го', 'Нет']))
     elif 'джозеф худший джоджо' in message.content.lower():
         await message.channel.send('полностью согласен!!!\nсамый крутой Джотаро')
     elif ('бот, скинь' in message.content.lower() or 'бот скинь' in message.content.lower()) and\
-        len(set(message.content.lower().split()) & set(['хуй', 'член', 'пенис', 'бабиджон', 'биба', 'пэнис'])) >= 1:
+            len(set(message.content.lower().split()) & set(['хуй', 'член', 'пенис', 'бабиджон', 'биба', 'пэнис'])) >= 1:
         html = requests.get('https://yandex.ru/images/search?from=tabbar&text=хуй').text
         itog = re.findall(r'(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])',
                           html)
@@ -585,47 +615,52 @@ class Speedwagon(commands.Cog):
 
     @commands.command()
     async def lyrics(self, ctx):
-        try:
-            auth = ' '.join(((easy_convert(now[ctx.message.guild.id])[-1]['uploader']) + ' ').split())
-            name_full = auth + ' ' + ' '.join(now[ctx.message.guild.id].split(' --- ')[0].split())
-            # print(name_full)
-            # urll = f'https://alloflyrics.cc/search/?s={quote(name_full)}'
-            # print(urll)
-            html = urllib.request.urlopen(f'https://alloflyrics.cc/search/?s={quote(name_full)}').read()
-            url = 'https://alloflyrics.cc/song/' + str(html).split('/song/')[1].split('">')[0]
-            # print(url)
-            if str(urllib.request.urlopen(url).read().decode('utf8')).split('<p>')[1].split()[0] == 'Из':
-                html = str(urllib.request.urlopen(url).read().decode('utf8')).split('<p>')[2].split('</p>')[0]
-            else:
-                html = str(urllib.request.urlopen(url).read().decode('utf8')).split('<p>')[1].split('</p>')[0]
-            html = html.replace('<br>', '\n')
-            html = html.split('<')
-            ht = []
-            for e in html:
-                if ">" not in e:
-                    ht.append(e)
-                else:
-                    for e1 in e.split('>'):
-                        ht.append(e1)
-            ht = [e for e in ht if e != '']
-            ht = [ht[i] for i in range(len(ht)) if i % 2 == 0]
-            itog = []
-            for e in ht:
-                string = ''
-                for e1 in e:
-                    if e1 != '\\':
-                        string += e1
-                itog += string
-            itog = ('\n'.join([''.join(itog).split('\n')[0].replace('xe2x80x99', "'").replace('’', "'")] + [e for e in ''.join(itog).split('\n') if
-                                                                e != ''.join(itog).split('\n')[0]])).replace('xe2x80x99',
-                                                                                                             "'").replace('’', "'")
-            with open("song_text.txt", "w") as file:
-                file.write(itog)
-            await ctx.reply(file=discord.File("song_text.txt"), mention_author=False)
-            os.remove('song_text.txt')
-        except Exception:
-            await ctx.reply('Видимо, произошла ошибка. Текста нема(', mention_author=False)
-            return
+        #try:
+            auth = easy_convert(now[ctx.message.guild.id])[-1]['uploader'].split(' - Topic')[0].split('VEVO')[0]
+            namev1 = now[ctx.message.guild.id].split(' --- ')[0]
+            namev2 = namev1.split('(')[0].split('[')[0]
+            sp = {}
+            try:
+                a = lyricsprs(geturl(namev1))
+                v1 = a[0]
+                nm = a[-1]
+                sp[nm] = v1
+            except Exception:
+                pass
+            try:
+                a = lyricsprs(geturl(auth + ' ' + namev1))
+                v2 = a[0]
+                nm = a[-1]
+                sp[nm] = v2
+            except Exception:
+                pass
+            try:
+                a = lyricsprs(geturl(namev2))
+                v3 = a[0]
+                nm = a[-1]
+                sp[nm] = v3
+            except Exception:
+                pass
+            try:
+                a = lyricsprs(geturl(auth + ' ' + namev2))
+                v4 = a[0]
+                nm = a[-1]
+                sp[nm] = v4
+            except Exception:
+                pass
+            sps = {}
+            for e in sp:
+                if e not in sps:
+                    sps[e] = sp[e]
+            await ctx.reply('**Вот всё, что я нашёл. Выбирай сам, короче**', mention_author=False)
+            for e in sps:
+                with open("song_text.txt", "w", encoding="utf-8") as file:
+                    file.write(sps[e])
+                await ctx.send(e)
+                await ctx.send(file=discord.File("song_text.txt"))
+                os.remove('song_text.txt')
+        #except Exception:
+        #    await ctx.reply('Видимо, произошла ошибка( Текста нема.', mention_author=False)
 
     @commands.command(name='pause')
     async def pause(self, ctx):
@@ -934,7 +969,7 @@ class Speedwagon(commands.Cog):
                                                                 random.randrange(0, 255),
                                                                 random.randrange(0, 255)))
             embed.set_author(name=b['uploader'])
-            embed.set_thumbnail(url=b['thumbnails'][0]['url'])
+            embed.set_thumbnail(url=b['thumbnails'][-1]['url'])
             if int(b['duration']) > 60:
                 m = int(b['duration']) // 60
                 s = int(b['duration']) - int(b['duration']) // 60 * 60
@@ -942,17 +977,17 @@ class Speedwagon(commands.Cog):
                     ch = m // 60
                     ost_m = m - ch * 60
                     embed.add_field(name="Длительность: ",
-                                    value=str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
+                                    value='`' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.`')
                     queues_n[guild_id].append(
                         b['title'] + ' --- ' + str(ch) + ' ч. ' + str(ost_m) + ' м. ' + str(s) + ' c.')
                 else:
                     embed.add_field(name="Длительность: ",
-                                    value=str(m) + ' м. ' + str(s) + ' c.')
+                                    value='`' + str(m) + ' м. ' + str(s) + ' c.`')
                     queues_n[guild_id].append(b['title'] + ' --- ' + str(m) + ' м. ' + str(s) + ' c.')
 
             else:
                 embed.add_field(name="Длительность: ",
-                                value=str(b['duration']) + ' c.')
+                                value='`' + str(b['duration']) + ' c.`')
                 queues_n[guild_id].append(b['title'] + ' --- ' + str(b['duration']) + ' c.')
             mes = await ctx.reply(embed=embed, mention_author=False)
             await mes.add_reaction('✅')
