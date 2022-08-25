@@ -288,7 +288,7 @@ def check_queue(ctx, id):
                 prev_n[id] = now[id]
                 prev[id] = source
             now[id] = queues_n[id][0]
-            asyncio.run_coroutine_threadsafe(send_message_to_channel(ctx, easy_convert(now[id])[-1]), client.loop)
+            asyncio.run(send_message_to_channel(ctx, easy_convert(now[id])[-1]), client.loop)
             vc.play(source, after=lambda x=0: check_queue(ctx, ctx.message.guild.id))
             del queues_n[id][0]
             del queues[id][0]
