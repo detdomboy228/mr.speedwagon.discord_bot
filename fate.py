@@ -1465,6 +1465,6 @@ class Speedwagon(commands.Cog):
 
 if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
-    bot.add_cog(Speedwagon(bot))
-    bot.run(os.environ['TOKEN'])
+    asyncio.run(bot.add_cog(Speedwagon(bot)))
+    asyncio.run(bot.run(os.environ['TOKEN']))
    
