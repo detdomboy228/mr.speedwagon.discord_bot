@@ -35,7 +35,7 @@ logger.addHandler(handler)
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix='-')
+bot = commands.Bot(command_prefix='-', intents=intents)
 YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'False', 'simulate': 'True',
                'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio',
                'logger': logger}
