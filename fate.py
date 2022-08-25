@@ -32,8 +32,8 @@ logger.setLevel(logging.WARNING)
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
-client = discord.Client(intents=discord.Intents.all())
-bot = commands.Bot(command_prefix='-', intents=discord.Intents.all())
+client = discord.Client()
+bot = commands.Bot(command_prefix='-')
 YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'False', 'simulate': 'True',
                'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio',
                'logger': logger}
@@ -1465,6 +1465,5 @@ class Speedwagon(commands.Cog):
 
 if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
-    asyncio.run(bot.add_cog(Speedwagon(bot)))
-    asyncio.run(bot.run(os.environ['TOKEN']))
-   
+    bot.add_cog(Speedwagon(bot))
+    bot.run(os.environ['TOKEN'])
