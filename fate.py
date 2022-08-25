@@ -33,7 +33,7 @@ handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 client = discord.Client(intents=discord.Intents.default())
-bot = commands.Bot(command_prefix='-')
+bot = commands.Bot(command_prefix='-', intents=discord.Intents.default())
 YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist': 'False', 'simulate': 'True',
                'preferredquality': '192', 'preferredcodec': 'mp3', 'key': 'FFmpegExtractAudio',
                'logger': logger}
