@@ -25,23 +25,8 @@ import logging
 import asyncio
 from transliterate import translit
 from dotenv import load_dotenv
-import ctypes
-import ctypes.util
 
 load_dotenv()
-####
-print("ctypes - Find opus:")
-aaaa = ctypes.util.find_library('opus')
-print(aaaa)
- 
-print("Discord - Load Opus:")
-bbbb = discord.opus.load_opus(aaaa)
-print(bbbb)
- 
-print("Discord - Is loaded:")
-cccc = discord.opus.is_loaded()
-print(cccc)
-###
 logger = logging.getLogger('discord')
 logger.setLevel(logging.WARNING)
 handler = logging.StreamHandler()
