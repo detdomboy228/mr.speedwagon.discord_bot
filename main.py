@@ -449,7 +449,7 @@ async def on_message(message):
         await message.channel.send(random.choice(["Это мой!!!", "Держи, сладкий", 'Блен, Максим, не стыдно???',
                                    'Держи кукан', 'Ну как, нравится?']))
         await message.channel.send(random.choice(sp[44:-17]))
-    #################################
+    ################################
     elif 'кот' in message.content.lower() or 'кош' in message.content.lower():
         r = requests.get('https://api.thecatapi.com/v1/images/search').json()[0]['url']
         await message.channel.send(r)
@@ -457,7 +457,7 @@ async def on_message(message):
             'пес' in message.content.lower() or 'пёс' in message.content.lower():
         r = requests.get('https://dog.ceo/api/breeds/image/random').json()['message']
         await message.channel.send(r)
-    #################################
+    ################################
     elif message.content in [str(x) for x in range(1, 10)] and flag_c_z[id]:
         if message.author.id == player[id]:
             if not c_z_matrix[id][(int(message.content) - 1) // 3][(int(message.content) - 1) % 3]:
