@@ -19,7 +19,7 @@ import json
 import requests
 import io
 import random
-from simpledemotivators import Demotivator, Quote
+#from simpledemotivators import Demotivator, Quote
 import yandex_weather_api
 import logging
 import asyncio
@@ -820,14 +820,14 @@ class Speedwagon(commands.Cog):
         try:
             img = Image.open(requests.get(ctx.message.attachments[0].url, stream=True).raw)
             img.save('example.png')
-            if ctx.message.content.split()[1] == 'dem':
-                if ';' in ctx.message.content:
-                    dem = Demotivator(ctx.message.content.split('-filter dem')[-1].split(';')[0],
-                                      ctx.message.content.split('-filter dem')[-1].split(';')[-1])
-                else:
-                    dem = Demotivator(ctx.message.content.split('-filter dem')[-1], '')
-                dem.create("example.png", result_filename='bebra.png')
-                await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
+            #if ctx.message.content.split()[1] == 'dem':
+            #    if ';' in ctx.message.content:
+            #        dem = Demotivator(ctx.message.content.split('-filter dem')[-1].split(';')[0],
+            #                          ctx.message.content.split('-filter dem')[-1].split(';')[-1])
+            #    else:
+            #        dem = Demotivator(ctx.message.content.split('-filter dem')[-1], '')
+            #    dem.create("example.png", result_filename='bebra.png')
+            #    await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
             elif ctx.message.content.split()[1] == 'ascii':
                 width = int(ctx.message.content.split()[2])
                 height_scale = 0.6
@@ -871,14 +871,14 @@ class Speedwagon(commands.Cog):
                 img = ImageOps.invert(img)
                 img.save('bebra.png')
                 await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
-            elif ctx.message.content.split()[1] == 'cit':
-                if len(ctx.message.content.split('-filter cit ')[-1].split(';')) == 2:
-                    a = Quote(ctx.message.content.split('-filter cit ')[-1].split(';')[0],
-                              ctx.message.content.split('-filter cit ')[-1].split(';')[-1])
-                else:
-                    a = Quote(ctx.message.content.split('-filter cit ')[-1].split(';')[0], 'неизвестный мыслитель')
-                a.create("example.png", result_filename='bebra.png')
-                await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
+            #elif ctx.message.content.split()[1] == 'cit':
+            #    if len(ctx.message.content.split('-filter cit ')[-1].split(';')) == 2:
+            #        a = Quote(ctx.message.content.split('-filter cit ')[-1].split(';')[0],
+            #                  ctx.message.content.split('-filter cit ')[-1].split(';')[-1])
+            #    else:
+            #        a = Quote(ctx.message.content.split('-filter cit ')[-1].split(';')[0], 'неизвестный мыслитель')
+            #    a.create("example.png", result_filename='bebra.png')
+            #    await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
             elif ctx.message.content.split()[1] == 'sh' or ctx.message.content.split()[1] == 'shakal':
                 if img.size[0] > 2000 or img.size[-1] > 2000:
                     img = img.resize((int(img.size[0] * 0.5), int(img.size[-1] * 0.5)))
