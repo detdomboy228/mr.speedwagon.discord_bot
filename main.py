@@ -28,7 +28,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-discord.opus.load_opus('opus')
+discord.opus.load_opus('opus.dll')
 if not discord.opus.is_loaded():
     raise RunTimeError('Opus failed to load')
 
