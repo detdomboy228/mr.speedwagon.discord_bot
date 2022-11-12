@@ -828,7 +828,7 @@ class Speedwagon(commands.Cog):
             #        dem = Demotivator(ctx.message.content.split('-filter dem')[-1], '')
             #    dem.create("example.png", result_filename='bebra.png')
             #    await ctx.reply(file=discord.File('bebra.png'), mention_author=False)
-            elif ctx.message.content.split()[1] == 'ascii':
+            if ctx.message.content.split()[1] == 'ascii':
                 width = int(ctx.message.content.split()[2])
                 height_scale = 0.6
                 org_width, orig_height = img.size
