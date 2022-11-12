@@ -1,4 +1,3 @@
-discord-ext-music
 python-dotenv
 beautifulsoup4==4.11.1
 bs4==0.0.1
