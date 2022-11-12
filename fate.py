@@ -7,6 +7,7 @@ import re
 from static_ffmpeg import run
 from bs4 import BeautifulSoup
 import wikipedia as wi
+import keep_alive
 import discord
 import pprint
 from discord.ext import commands
@@ -273,8 +274,6 @@ def check_c_z(message):
 def check_queue(ctx, id):
     global queues_n, queues, prev, prev_n, now
     if queues[id] != {}:
-        #if not discord.opus.is_loaded():
-        #    discord.opus.load_opus('libopus.so')
         vc = ctx.guild.voice_client
         try:
             if ctx.message.guild.id in is_potok:
@@ -1466,4 +1465,5 @@ class Speedwagon(commands.Cog):
 if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
     bot.add_cog(Speedwagon(bot))
+    keep_alive.keep_alive()
     bot.run(os.environ['TOKEN'])
