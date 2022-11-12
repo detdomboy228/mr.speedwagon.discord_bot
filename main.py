@@ -27,6 +27,11 @@ from transliterate import translit
 from dotenv import load_dotenv
 
 load_dotenv()
+
+discord.opus.load_opus('opus')
+if not discord.opus.is_loaded():
+    raise RunTimeError('Opus failed to load')
+
 logger = logging.getLogger('discord')
 logger.setLevel(logging.WARNING)
 handler = logging.StreamHandler()
