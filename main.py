@@ -7,7 +7,6 @@ import re
 from static_ffmpeg import run
 from bs4 import BeautifulSoup
 import wikipedia as wi
-import keep_alive
 import discord
 import pprint
 from discord.ext import commands
@@ -1465,5 +1464,4 @@ class Speedwagon(commands.Cog):
 if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
     bot.add_cog(Speedwagon(bot))
-    keep_alive.keep_alive()
     bot.run(os.environ['TOKEN'])
