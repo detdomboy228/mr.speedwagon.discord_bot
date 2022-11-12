@@ -25,7 +25,7 @@ import logging
 import asyncio
 from transliterate import translit
 from dotenv import load_dotenv
-
+#
 load_dotenv()
 logger = logging.getLogger('discord')
 logger.setLevel(logging.WARNING)
