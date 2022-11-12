@@ -35,7 +35,7 @@ aaaa = ctypes.util.find_library('opus')
 print(aaaa)
  
 print("Discord - Load Opus:")
-bbbb = discord.opus.load_opus(a)
+bbbb = discord.opus.load_opus(aaaa)
 print(bbbb)
  
 print("Discord - Is loaded:")
