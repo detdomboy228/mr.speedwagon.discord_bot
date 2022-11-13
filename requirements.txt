@@ -24,4 +24,3 @@ wikipedia==1.4.0
 xlrd==2.0.1
 yandex-weather-api==0.2.4
 youtube-dl==2021.12.17
-discord.py[voice]
