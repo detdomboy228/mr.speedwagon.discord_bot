@@ -19,7 +19,7 @@ import json
 import requests
 import io
 import random
-#from simpledemotivators import Demotivator, Quote 
+#from simpledemotivators import Demotivator, Quote
 import yandex_weather_api
 import logging
 import asyncio
