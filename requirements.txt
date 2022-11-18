@@ -1,6 +1,7 @@
 python-dotenv
 beautifulsoup4==4.11.1
 discord-ext-music
+opuslib
 bs4==0.0.1
 cmd2==2.3.3
 discord==1.7.3
