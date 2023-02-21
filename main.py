@@ -113,7 +113,7 @@ def geturl(name):
     return a
 
 
-def obrabotka_c_z(message):
+  def obrabotka_c_z(message):
     global c_z_matrix, flag_c_z, storona
     egor_loh = ['x', 'o']
     id = message.guild.id
@@ -230,6 +230,16 @@ def obrabotka_c_z(message):
                         c_z_matrix[id][1][2] = 'o'
                     else:
                         c_z_matrix[id][2][1] = 'o'
+            elif (c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][0] == 'x') or (c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][2] == 'x') or\
+                    (c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][0] == 'x') or (c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][2] == 'x'):
+                if c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][0] == 'x':
+                    c_z_matrix[id][0][0] = 'x'
+                elif c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][2] == 'x':
+                    c_z_matrix[id][0][2] = 'x'
+                elif c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][0] == 'x':
+                    c_z_matrix[id][2][0] = 'x'
+                elif c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][2] == 'x':
+                    c_z_matrix[id][2][2] = 'x'
             if c_z_matrix[id][0].count('x') + c_z_matrix[id][1].count('x') + c_z_matrix[id][2].count('x') > \
                     c_z_matrix[id][0].count('o') + c_z_matrix[id][1].count('o') + c_z_matrix[id][2].count('o'):
                 free_list = []
@@ -242,6 +252,7 @@ def obrabotka_c_z(message):
                     c_z_matrix[id][a[0]][a[1]] = 'o'
                 else:
                     pass
+
 
 
 def check_c_z(message):
