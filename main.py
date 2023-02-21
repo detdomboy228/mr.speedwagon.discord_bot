@@ -232,13 +232,13 @@ def geturl(name):
                         c_z_matrix[id][2][1] = 'o'
             elif (c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][0] == 'x') or (c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][2] == 'x') or\
                     (c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][0] == 'x') or (c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][2] == 'x'):
-                if c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][0] == 'x':
+                if c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][0] == 'x' and not c_z_matrix[id][0][0]:
                     c_z_matrix[id][0][0] = 'x'
-                elif c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][2] == 'x':
+                elif c_z_matrix[id][0][1] == 'x' and c_z_matrix[id][1][2] == 'x' and not c_z_matrix[id][0][2]:
                     c_z_matrix[id][0][2] = 'x'
-                elif c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][0] == 'x':
+                elif c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][0] == 'x' and not c_z_matrix[id][2][0]:
                     c_z_matrix[id][2][0] = 'x'
-                elif c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][2] == 'x':
+                elif c_z_matrix[id][2][1] == 'x' and c_z_matrix[id][1][2] == 'x' and not c_z_matrix[id][2][2]:
                     c_z_matrix[id][2][2] = 'x'
             if c_z_matrix[id][0].count('x') + c_z_matrix[id][1].count('x') + c_z_matrix[id][2].count('x') > \
                     c_z_matrix[id][0].count('o') + c_z_matrix[id][1].count('o') + c_z_matrix[id][2].count('o'):
